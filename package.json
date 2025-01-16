@@ -1,0 +1,14 @@
+{
+  "name": "knoxy",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "Bizarrus",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "proxy":	"node ./main.js",
+	"client":	"%USERPROFILE%/Knuddels-Stapp/CommonFiles/Java/bin/javaw.exe -noverify -client -jar %USERPROFILE%/Knuddels-Stapp/kjupdate.jar localhost 2710",
+	"start":	"npm run proxy && npm run client"
+  }
+}
