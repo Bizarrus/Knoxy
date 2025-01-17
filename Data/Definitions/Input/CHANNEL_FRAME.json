@@ -1,0 +1,70 @@
+{
+	"opcode":		"a",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "string"
+		},
+		{
+			"name": "Nickname",
+			"type": "string"
+		},
+		{
+			"name": "ScrollSpeed",
+			"type": "Integer"
+		},
+		{
+			"name": "Width",
+			"type": "Integer"
+		},
+		{
+			"name": "Height",
+			"type": "Integer"
+		},
+		{
+			"name": "PositionX",
+			"type": "Integer"
+		},
+		{
+			"name": "PositionY",
+			"type": "Integer"
+		},
+		{
+			"name": "BackgroundImageURL",
+			"type": "String"
+		},
+		{
+			"name": "BackgroundImagePosition",
+			"type": "Integer"
+		},
+		{
+			"name": "Style",
+			"type": "ChannelStyle"
+		},
+		{
+			"name": "ComboBox",
+			"type": "Boolean"
+		},
+		{
+			"name": "MaxMessageLength",
+			"type": "Integer"
+		},
+		{
+			"name": "ButtonHelp",
+			"type": "Boolean"
+		},
+		{
+			"name": "ButtonReport",
+			"type": "Boolean"
+		},
+		{
+			"name": "ButtonFeedback",
+			"type": "Boolean"
+		},
+		{
+			"name": "ButtonSearch",
+			"type": "Boolean"
+		}
+	]
+}

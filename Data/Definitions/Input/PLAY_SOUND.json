@@ -1,0 +1,10 @@
+{
+	"opcode":		"o",
+	"description":	"Spielt eine Sound-Datei ab",
+	"parameters":	[
+		{
+			"name": "File",
+			"type": "string"
+		}
+	]
+}

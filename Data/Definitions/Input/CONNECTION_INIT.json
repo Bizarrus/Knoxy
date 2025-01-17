@@ -1,0 +1,14 @@
+{
+	"opcode":		"(",
+	"description":	"Connection-Initalization",
+	"parameters":	[
+		{
+			"name": "PasswordKey",
+			"type": "string"
+		},
+		{
+			"name": "Suggestion",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,18 @@
+{
+	"opcode":		"n",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "String"
+		},
+		{
+			"name": "Nickname",
+			"type": "String"
+		},
+		{
+			"name": "Password",
+			"type": "String"
+		}
+	]
+}

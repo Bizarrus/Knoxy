@@ -1,0 +1,22 @@
+{
+	"opcode":		"iv",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "ID",
+			"type": "new|Integer"
+		},
+		{
+			"name": "Action",
+			"type": "String"
+		},
+		{
+			"name": "Question",
+			"type": "String"
+		},
+		{
+			"name": "Answers",
+			"type": "String[;]"
+		}
+	]
+}

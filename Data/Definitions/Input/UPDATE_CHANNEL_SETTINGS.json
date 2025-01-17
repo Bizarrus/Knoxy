@@ -1,0 +1,14 @@
+{
+	"opcode":		"1",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "string"
+		},
+		{
+			"name": "Style",
+			"type": "ChannelStyle"
+		}
+	]
+}

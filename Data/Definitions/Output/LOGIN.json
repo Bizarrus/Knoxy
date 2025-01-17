@@ -1,0 +1,22 @@
+{
+	"opcode":		"n",
+	"description":	"Login packet",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "string"
+		},
+		{
+			"name": "Nickname",
+			"type": "string"
+		},
+		{
+			"name": "Password",
+			"type": "string"
+		},
+		{
+			"name": "Type",
+			"type": "boolean"
+		}
+	]
+}

@@ -1,0 +1,22 @@
+{
+	"opcode":		"m",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "String"
+		},
+		{
+			"name": "Nickname",
+			"type": "String"
+		},
+		{
+			"name": "IconLeft",
+			"type": "String"
+		},
+		{
+			"name": "IconRight",
+			"type": "String"
+		}
+	]
+}

@@ -1,0 +1,15 @@
+{
+	"opcode":		"u",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "String"
+		},
+		{
+			"name": "Users",
+			"type": "ChannelUsers[]",
+			"_comment": "/* Name, Style, RGB, IconLeft, IconRight, - */"
+		}
+	]
+}

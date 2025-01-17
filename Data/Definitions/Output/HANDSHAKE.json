@@ -1,0 +1,38 @@
+{
+	"opcode":		"t",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Version",
+			"type": "String"
+		},
+		{
+			"name": "Location",
+			"type": "String"
+		},
+		{
+			"name": "Unknown_1",
+			"type": "String"
+		},
+		{
+			"name": "JavaVersion",
+			"type": "String"
+		},
+		{
+			"name": "Unknown_2",
+			"type": "String"
+		},
+		{
+			"name": "Port",
+			"type": "Integer"
+		},
+		{
+			"name": "JavaSoftware",
+			"type": "String"
+		},
+		{
+			"name": "UUID",
+			"type": "String"
+		}
+	]
+}

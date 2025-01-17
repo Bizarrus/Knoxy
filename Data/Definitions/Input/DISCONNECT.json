@@ -1,0 +1,14 @@
+{
+	"opcode":		"d",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "ChannelFrom",
+			"type": "String"
+		},
+		{
+			"name": "ChannelTo",
+			"type": "String"
+		}
+	]
+}

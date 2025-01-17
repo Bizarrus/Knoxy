@@ -1,0 +1,30 @@
+{
+	"opcode":		"l",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "String"
+		},
+		{
+			"name": "Nickname",
+			"type": "String"
+		},
+		{
+			"name": "Style",
+			"type": "Char"
+		},
+		{
+			"name": "Color",
+			"type": "RGB"
+		},
+		{
+			"name": "IconLeft",
+			"type": "String"
+		},
+		{
+			"name": "IconRight",
+			"type": "String"
+		}
+	]
+}

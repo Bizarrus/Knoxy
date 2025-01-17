@@ -1,0 +1,14 @@
+{
+	"opcode":		"6",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "string"
+		},
+		{
+			"name": "Reason",
+			"type": "string"
+		}
+	]
+}

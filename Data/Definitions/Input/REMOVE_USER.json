@@ -1,0 +1,14 @@
+{
+	"opcode":		"w",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Nickname",
+			"type": "String"
+		},
+		{
+			"name": "Channel",
+			"type": "String"
+		}
+	]
+}

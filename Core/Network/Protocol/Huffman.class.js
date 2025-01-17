@@ -6,6 +6,8 @@ import Path from '../../Utils/Path.class.js';
 import fs from 'node:fs';
 
 export default (new class Huffman {
+    Tree = null;
+
 	constructor() {
         this.DecRoot			= new BinaryNode();
         this._16BitChar			= null;
@@ -13,35 +15,43 @@ export default (new class Huffman {
         this._16BitCharPathLen	= 0;
         this.CharBuffer			= new Array(65535).fill(0);
         this.EncMap				= new Map();
-        //this.Tree				= String.fromCharCode(...Tree);
-
-		const data = fs.readFileSync('./Data/Tree.bin');
-		this.Tree = data.toString('utf-8');
-
-		let result = '';
-		let index = 0;
-
-		while (index < this.Tree.length) {
-		let currentChar = this.Tree.charAt(index);
-		if (currentChar === '\u0001') {
-			index++;
-			currentChar = this.Tree.charAt(index);
-			if (currentChar === '0') {
-				result += '\u0000';
-				index++;
-				continue;
-			}
-		}
-		result += currentChar;
-		index++;
-		}
-		this.Tree = result;
-
 
         this.createTree();
     }
 
+    setTree(name) {
+        const data  = fs.readFileSync('./Data/' + name);
+		this.Tree   = data.toString('utf-8');
+        let result  = [];
+		let index   = 0;
+
+		while(index < this.Tree.length) {
+		    let currentChar = this.Tree.charAt(index);
+
+            if(currentChar === '\u0001') {
+                index++;
+                currentChar = this.Tree.charAt(index);
+
+                if(currentChar === '0') {
+                    result.push('\u0000');
+                    index++;
+                    continue;
+                }
+            }
+
+            result.push(currentChar);
+		    index++;
+		}
+
+		this.Tree = result.join('');
+        this.createTree();
+    }
+
     createTree() {
+        if(this.Tree === null) {
+            return;    
+        }
+
         let m	= 1;
         let n	= -33;
         let strLen;

@@ -1,0 +1,14 @@
+{
+	"opcode":		"e",
+	"description":	"Public Message",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "string"
+		},
+		{
+			"name": "Message",
+			"type": "string"
+		}
+	]
+}

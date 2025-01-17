@@ -1,0 +1,10 @@
+{
+	"opcode":		"w",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channel",
+			"type": "String"
+		}
+	]
+}

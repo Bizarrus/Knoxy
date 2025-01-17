@@ -1,0 +1,14 @@
+{
+	"opcode":		"x",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "URL",
+			"type": "String"
+		},
+		{
+			"name": "Target",
+			"type": "String"
+		}
+	]
+}

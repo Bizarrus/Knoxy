@@ -1,0 +1,10 @@
+{
+	"opcode":		"h",
+	"description":	"Ping",
+	"parameters":	[
+		{
+			"name": "Receiver",
+			"type": "-|Nickname:UnixTimestamp"
+		}
+	]
+}

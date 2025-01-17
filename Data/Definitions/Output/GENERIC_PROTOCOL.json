@@ -1,0 +1,8 @@
+{
+	"opcode":		"q",
+	"description":	"",
+	"parameters":	{
+		"name": "Buffer",
+		"type": "GenericProtocol"
+	}
+}

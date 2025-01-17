@@ -1,0 +1,11 @@
+{
+	"opcode":		"b",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Channels",
+			"type": "Channels[]",
+			"_comment": "/* Name, Count, Style, B, [Icon], - */"
+		}
+	]
+}

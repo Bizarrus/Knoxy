@@ -14,3 +14,4 @@ b*/
 *.jar
 *.log
 *.part
+package-lock.json

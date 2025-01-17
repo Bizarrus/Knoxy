@@ -1,6 +1,9 @@
 import Proxy from './Core/Network/Proxy.class.js';
+import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import Packet from './Core/Network/Protocol/Packet.class.js';
 import Huffman from './Core/Network/Protocol/Huffman.class.js';
+import Chalk from 'chalk';
+import {template} from 'chalk-template';
 
 class Main {
 	Configuration = {
@@ -9,11 +12,14 @@ class Main {
 		},
 		Endpoint: {
 			Hostname: 	'chat.knuddels.de',
-			Port:		2710
+			Port:		2710,
+			Huffman:	'Tree_16.01.2025.bin'
 		}
 	};
-	
-	constructor() {		
+
+	constructor() {
+		Huffman.setTree(this.Configuration.Endpoint.Huffman);
+
 		this.Proxy = new Proxy(this.Configuration);
 		
 		this.Proxy.on('started', (port) => {
@@ -23,80 +29,27 @@ class Main {
 		this.Proxy.on('connected', (session) => {
 			//console.log('Connected to the Server:', session);
 		});
-		let protocol;
-		let auth = false;
+		
+		let color_swap = true;
 		
 		this.Proxy.on('packet', (session, typ, buffer) => {
 			let packet		= Packet.decode(buffer);
 			let protocol	= Huffman.decompress(packet);
 			let parts		= protocol.split('\0');
 			let opcode		= parts[0];
-			
-			switch(typ) {
-				case 'Server':
-					switch(opcode) {
-						case '5':
-							console.warn('[System Bots]', parts.slice(1));
-						break;
-						case 't':
-							console.warn('[Action]', {
-								channel:	parts[2],
-								nickname:	parts[1],
-								message:	parts[3]
-							});
-						break;
-						case 'r':
-							console.warn('[PrivateMessage]', {
-								user: {
-									sender:			parts[1],
-									receiver:		parts[2]
-								},
-								channel:		parts[3],
-								message: {
-									to:		parts[4],
-									from:	parts[5]
-								}
-							});
-						break;
-						case 'cnt':
-							console.warn('[Modules]');
-						break;
-						default:
-							console.log('[Packet]', typ, opcode, parts);
-						break;
-					}
-				break;
-				case 'Client':
-					switch(opcode) {
-						case 'n':
-							console.warn('[Login]', {
-								channel:	parts[1],
-								nickname:	parts[2],
-								password:	parts[3],
-								bool:		parts[4]
-							});
-						break;
-						case 'e':
-							console.warn('[PublicMessage]', {
-								channel:	parts[1],
-								message:	parts[2]
-							});
-						break;
-						case 'h':
-							console.warn('[Ping]', parts[1]); // Nick|UnixTimestamp
-						break;
-						case 'q':
-							console.warn('[GenericProtocol]');
-						break;
-						default:
-							//console.log('[Packet]', typ, opcode, parts);
-						break;
-					}			
-				break;
+			color_swap		= !color_swap;
+			let definition	= Definitions.resolve((typ === 'Server' ? 'Input' : 'Output'), opcode, parts);
+
+			if(definition === null) {
+				console.warn(Chalk.hex('#F0FF5E')('[WARN]'),  Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#444444')('Unknown Packet:'),  Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#FF0000')(opcode));
+				return;
 			}
 			
-			//console.log('[Client] TXT:', ).replace('\0', '\\0'));
+			// CLI-Mode
+			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
 			
+			// Send Definition to UI
+
 			return true;
 		});
 		
@@ -112,7 +65,13 @@ class Main {
 			//console.error('[Disconnect] from', session, type);
 		});
 		
-		this.Proxy.start();
+		let _watcher = setInterval(() => {
+			if(Definitions.isReady()) {
+				clearInterval(_watcher);
+				this.Proxy.start();
+				return;
+			}
+		}, 500);
 	}
 }
 

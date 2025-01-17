@@ -1,0 +1,26 @@
+{
+	"opcode":		"r",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Sender",
+			"type": "String"
+		},
+		{
+			"name": "Receiver",
+			"type": "String"
+		},
+		{
+			"name": "ChannelTo",
+			"type": "String"
+		},
+		{
+			"name": "Message",
+			"type": "String"
+		},
+		{
+			"name": "ChannelFrom",
+			"type": "String"
+		}
+	]
+}

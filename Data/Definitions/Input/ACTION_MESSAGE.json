@@ -1,0 +1,18 @@
+{
+	"opcode":		"t",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Sender",
+			"type": "String"
+		},
+		{
+			"name": "Channel",
+			"type": "String"
+		},
+		{
+			"name": "Message",
+			"type": "String"
+		}
+	]
+}
