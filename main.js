@@ -12,14 +12,11 @@ class Main {
 		},
 		Endpoint: {
 			Hostname: 	'chat.knuddels.de',
-			Port:		2710,
-			Huffman:	'Tree_16.01.2025.bin'
+			Port:		2710
 		}
 	};
 
 	constructor() {
-		Huffman.setTree(this.Configuration.Endpoint.Huffman);
-
 		this.Proxy = new Proxy(this.Configuration);
 		
 		this.Proxy.on('started', (port) => {
@@ -31,18 +28,39 @@ class Main {
 		});
 		
 		let color_swap = true;
-		
+		let first = true;
+
 		this.Proxy.on('packet', (session, typ, buffer) => {
 			let packet		= Packet.decode(buffer);
+
+			if(first) {
+				console.log(packet.toString('utf-8'));
+				first = false;
+				return true;
+			}
+
 			let protocol	= Huffman.decompress(packet);
 			let parts		= protocol.split('\0');
 			let opcode		= parts[0];
+
+			if(protocol.startsWith('cnt')) {
+				return true;
+			}
+
 			color_swap		= !color_swap;
 			let definition	= Definitions.resolve((typ === 'Server' ? 'Input' : 'Output'), opcode, parts);
 
 			if(definition === null) {
-				console.warn(Chalk.hex('#F0FF5E')('[WARN]'),  Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#444444')('Unknown Packet:'),  Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#FF0000')(opcode));
-				return;
+				console.log(Chalk.hex('#FF0000')(opcode), protocol.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
+					let hex = char.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase();
+
+					if(hex === '00') {
+						return Chalk.hex('#008000')('\\0');
+					}
+
+					return Chalk.hex('#FF9000')(`[${hex}=${char.charCodeAt(0)}]`);
+				}));
+				return true;
 			}
 			
 			// CLI-Mode
