@@ -11,19 +11,19 @@
 			"type": "String"
 		},
 		{
-			"name": "Unknown_1",
-			"type": "String"
+			"name": "Category",
+			"type": "Integer"
 		},
 		{
 			"name": "JavaVersion",
 			"type": "String"
 		},
 		{
-			"name": "Unknown_2",
-			"type": "String"
+			"name": "Unused (früher PLZ)",
+			"type": "String|Integer"
 		},
 		{
-			"name": "Port",
+			"name": "LocalPort",
 			"type": "Integer"
 		},
 		{
@@ -31,7 +31,32 @@
 			"type": "String"
 		},
 		{
-			"name": "UUID",
+			"name": "KnRi-Cookie",
+			"type": "String"
+		},
+
+		{
+			"name": "AllocatedMemory",
+			"type": "Integer"
+		},
+		{
+			"name": "JavaPublisher",
+			"type": "String"
+		},
+		{
+			"name": "Operating System",
+			"type": "String"
+		},
+		{
+			"name": "JX/JFX Version",
+			"type": "String"
+		},
+		{
+			"name": "PreAuth Nickname",
+			"type": "String"
+		},
+		{
+			"name": "PreAuth PasswordHash",
 			"type": "String"
 		}
 	]
