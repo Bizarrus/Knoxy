@@ -8,9 +8,6 @@ export default class GenericProtocol {
     this.index = index;
     this.values = new Map();
 
-    this.disposed = false;
-    this.refCount = 1;
-
     this.tree = null;
     this.treeIndex = 0;
     this.byteData = null;
@@ -116,7 +113,6 @@ export default class GenericProtocol {
     }
     if (!Number.isInteger(ref)) return null;
 
-    this.refCount++;
     const node = new GenericProtocol(ref);
     node.name = this.nodeNames[ref];
 
@@ -127,7 +123,6 @@ export default class GenericProtocol {
     node.hash = this.hash;
     node.byteData = this.byteData;
 
-    node.refCount = this.refCount;
     return node;
   }
 

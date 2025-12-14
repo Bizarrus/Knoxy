@@ -60,7 +60,8 @@ class Main {
 			
 			if (opcode == ':' || opcode == 'q') {
 				let generic = genericTree.read(packet, 2);
-				console.log('GenericTest', typ, generic.getName(), generic.values);
+				const values = Object.fromEntries(generic.values);
+				console.log('GenericTest', typ, generic.getName(), Array.from(generic.values));
 
 				if (opcode == ':' && generic.getName() == 'CHANGE_PROTOCOL') {
 					genericTree.updateTree(generic.get('PROTOCOL_DATA'));

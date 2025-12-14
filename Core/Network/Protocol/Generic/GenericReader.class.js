@@ -1,16 +1,27 @@
 export default class GenericReader {
     constructor(data, position = 0) {
-        this.stringData = typeof data === 'string' ? data : null;
-        this.byteData   = Buffer.isBuffer(data) ? data : null;
-        this.position   = position;
-        this.length     = this.stringData ? this.stringData.length : this.byteData.length;
+        if (typeof data === 'string') {
+            // Java String = UTF-16 char array
+            this.stringData = data;
+            this.byteData = null;
+            this.length = data.length;
+        } else if (Buffer.isBuffer(data)) {
+            this.byteData = data;
+            this.stringData = null;
+            this.length = data.length;
+        } else {
+            throw new Error('Invalid GenericReader input');
+        }
+
+        this.position = position;
     }
 
+    /* read() */
     read() {
         return this.position === this.length ? -1 : (this.readByte() & 0xFF);
     }
 
-    readBytes(buffer, offset = 0, length = buffer.length) {
+    readBuffer(buffer, offset = 0, length = buffer.length) {
         for (let i = 0; i < length; i++) {
             buffer[offset + i] = this.readByte();
         }
@@ -18,9 +29,11 @@ export default class GenericReader {
 
     readByte() {
         if (this.byteData === null) {
+            // Java: (byte) string.charAt()
             return this.stringData.charCodeAt(this.position++) & 0xFF;
+        } else {
+            return this.byteData[this.position++];
         }
-        return this.byteData[this.position++];
     }
 
     readBoolean() {
@@ -30,8 +43,22 @@ export default class GenericReader {
     readChar() {
         if (this.byteData === null) {
             return this.stringData.charAt(this.position++);
+        } else {
+            return String.fromCharCode(this.readShort());
         }
-        return String.fromCharCode(this.readShort());
+    }
+
+    /* readDouble() */
+    readDouble() {
+        const buf = Buffer.allocUnsafe(8);
+        for (let i = 0; i < 8; i++) buf[i] = this.readByte();
+        return buf.readDoubleBE(0);
+    }
+
+    readFloat() {
+        const buf = Buffer.allocUnsafe(4);
+        for (let i = 0; i < 4; i++) buf[i] = this.readByte();
+        return buf.readFloatBE(0);
     }
 
     readInt() {
@@ -43,30 +70,15 @@ export default class GenericReader {
     }
 
     readLong() {
-        let r = 0n;
+        let result = 0n;
         for (let i = 0; i < 8; i++) {
-            r = (r << 8n) | BigInt(this.readByte() & 0xFF);
+            result = (result << 8n) | BigInt(this.readByte() & 0xFF);
         }
-        return r;
-    }
-
-    readFloat() {
-        const buf = Buffer.alloc(4);
-        buf.writeInt32BE(this.readInt(), 0);
-        return buf.readFloatBE(0);
-    }
-
-    readDouble() {
-        const buf = Buffer.alloc(8);
-        buf.writeBigInt64BE(this.readLong(), 0);
-        return buf.readDoubleBE(0);
+        return result;
     }
 
     readShort() {
-        const hi = this.readByte() & 0xFF;
-        const lo = this.readByte() & 0xFF;
-        const val = (hi << 8) | lo;
-        return (val << 16) >> 16; // cast to signed short
+        return ((this.read() << 8) | this.read()) & 0xFFFF;
     }
 
     readUnsignedByte() {
@@ -79,12 +91,42 @@ export default class GenericReader {
 
     readUTF() {
         const utfLength = this.readUnsignedShort();
-        const bytes = Buffer.alloc(utfLength);
-        this.readBytes(bytes, 0, utfLength);
-        return bytes.toString('utf8');
+        const byteArray = Buffer.allocUnsafe(utfLength);
+        this.readBuffer(byteArray, 0, utfLength);
+
+        let out = '';
+        let i = 0;
+
+        while (i < utfLength) {
+            const c = byteArray[i] & 0xFF;
+            if (c < 0x80) {
+                out += String.fromCharCode(c);
+                i++;
+            } else if ((c >> 4) === 12 || (c >> 4) === 13) {
+                const c2 = byteArray[i + 1];
+                out += String.fromCharCode(
+                    ((c & 0x1F) << 6) | (c2 & 0x3F)
+                );
+                i += 2;
+            } else if ((c >> 4) === 14) {
+                const c2 = byteArray[i + 1];
+                const c3 = byteArray[i + 2];
+                out += String.fromCharCode(
+                    ((c & 0x0F) << 12) |
+                    ((c2 & 0x3F) << 6) |
+                    (c3 & 0x3F)
+                );
+                i += 3;
+            } else {
+                throw new Error('Malformed UTF');
+            }
+        }
+        return out;
     }
 
     skipBytes(n) {
+        const old = this.position;
         this.position = Math.min(this.length, this.position + n);
+        return this.position - old;
     }
 }
