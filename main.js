@@ -33,7 +33,7 @@ class Main {
 		});
 		
 		let color_swap = true;
-		const genericTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericTree.bin').toString('utf8'));
+		const genericTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericTree.txt').toString('utf8'));
 
 		this.Proxy.on('packet', (session, typ, packet) => {
 			let parts		= packet.split('\0');
