@@ -1,84 +1,79 @@
 export default (new class Packet {
-	DecodeKey = [ 'K' ];
 
-	decode(buff) {
-		let pos		= 0;
-		let first	= buff[pos++];
-		
-		if(first === null) {
-			return null;
-		}
-		
-		if(first == -1) {
-			return null;
-		}
-		
-		let length		= 0;
+    decode(stream, decodeKey) {
+        let rawFirst = stream.readByte();
+        if (rawFirst === -1) 
+            return null;
 
-		if(first >= 0) {
-			length		= first + 1;
-		} else {
-			length		= (first & 0x1F) + 1;
-			let count	= (first & 0x60) >>> 5;
+        let first = (rawFirst & 0x80) ? rawFirst - 256 : rawFirst;
 
-			for(let i = 1; i < count; i++) {
-				let nextByte = buff[pos++];
+        let length;
+        if (first >= 0) {
+            length = first + 1;
+        } else {
+            length = (rawFirst & 0x1F) + 1;
+            let count = (rawFirst & 0x60) >> 5;
+            let needed = count;
+            if (stream.available() < needed) return null;
 
-				if(nextByte == -1) {
-					throw new IOException("Unexpected end of stream");
+            for (let i = 0; i < count; i++) {
+                let b = stream.readByte();
+                if (b === -1) return null;
+                b &= 0xFF;
+                length += b << ((i << 3) + 5);
+            }
+        }
+
+        if (stream.available() < length)
+            return null;
+
+        let buffer = Buffer.alloc(length);
+        for (let i = 0; i < length; i++) {
+            let b = stream.readByte();
+            if (b === -1) return null;
+
+            buffer[i] = (b ^ ((decodeKey && i < decodeKey.length) ? decodeKey[i] : 0)) & 0xFF;
+        }
+
+        return buffer;
+    }
+
+    encode(message, extraData = null, encodeKey = null) {
+        if (typeof message === 'undefined') {
+            return null;
+        }
+
+        if (encodeKey && encodeKey.length) {
+            for (let i = 0; i < message.length; i++) {
+				if (i < encodeKey.length) {
+					message[i] = (message[i] ^ encodeKey[i]);
 				}
-
-				length += nextByte << (i - 1) * 8;
 			}
 		}
-		
-		let buffer = Buffer.alloc(length);
-		
-		for(let i = 0; i < length; i++) {
-			let readByte	= buff[pos++];
+        
+        const length    = ((extraData && extraData.length ? extraData.length : 0) + message.length) - 1;
+        let len;
 
-			if(readByte == -1) {
-				throw new IOException("Unexpected end of stream");
-			}
+        if (length < 128) {
+            len = Buffer.from([ length ]);
+        } else {
+            let count = 0;
+            while ((32 << ((count + 1) << 3)) <= length) {
+                count++;
+            }
+            count++;
 
-			buffer[i] = (readByte ^ (this.DecodeKey != null && i < this.DecodeKey.length ? this.DecodeKey[i] : 0));
-		}
-		
-		//console.log('[Packet]', length, buffer.length);
+            len   = Buffer.alloc(count + 1);
+            len[0]= (count << 5) | 0x80 | (length & 0x1F);
 
-		return buffer;
-	}
-	
-	encode(message) {
-		if(typeof(message) === 'undefined') {
-			return null;
-		}
-		
-		const length = message.length - 1;
-		let len;
+            for (let i = 1; i < len.length; i++) {
+                len[i] = (length >>> ((8 * (i - 1)) + 5)) & 0xFF;
+            }
+        }
 
-		if(length < 128) {
-			len = Buffer.from([ length ]);
-		} else {
-			let count = 0;
-			console.log("ZWO");
-			while((32 << ((count + 1) << 3)) <= length) {
-			//while(32 << (count + 1 << 3) <= length) {
-				count++;
-			}
+        return extraData
+            ? Buffer.concat([len, extraData, message])
+            : Buffer.concat([len, message]);
+    }
 
-			count++;
-			
-			len			= Buffer.alloc(count + 1);
-			len[0]		= (count << 5) | 0x80 | (length & 0x1F);
-			//len[0]	= (count << 5 | 0x80 | length & 0x1F);
-
-			for(let i = 1; i < len.length; i++) {
-				len[i]		= (length >>> (8 * (i - 1)) + 5) & 0xFF;
-				//len[i]	= (length >>> 8 * (i - 1) + 5);
-			}
-		}
-
-		return Buffer.concat([ len, message ]);
-	}
 }());

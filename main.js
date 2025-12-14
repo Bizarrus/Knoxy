@@ -1,9 +1,11 @@
 import Proxy from './Core/Network/Proxy.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
-import Packet from './Core/Network/Protocol/Packet.class.js';
+import Bundle from './Core/Network/Protocol/Packet.class.js';
 import Huffman from './Core/Network/Protocol/Huffman.class.js';
 import Chalk from 'chalk';
 import {template} from 'chalk-template';
+import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
+import fs from 'node:fs';
 
 class Main {
 	Configuration = {
@@ -26,29 +28,19 @@ class Main {
 		this.Proxy.on('connected', (session) => {
 			//console.log('Connected to the Server:', session);
 		});
+		this.Proxy.on('sessionType', (session, typ) => {
+			console.log(session, '[Type]', typ);
+		});
 		
 		let color_swap = true;
-		let first = true;
+		const genericTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericTree.txt').toString('utf8'));
 
-		this.Proxy.on('packet', (session, typ, buffer) => {
-			let packet		= Packet.decode(buffer);
-
-			if(first) {
-				console.log(packet.toString('utf-8'));
-				first = false;
-				return true;
-			}
-
-			let protocol	= Huffman.decompress(packet);
-			let parts		= protocol.split('\0');
+		this.Proxy.on('packet', (session, typ, packet) => {
+			let parts		= packet.split('\0');
 			let opcode		= parts[0];
 
-			if(protocol.startsWith('cnt')) {
-				return true;
-			}
-
 			color_swap		= !color_swap;
-			let definition	= Definitions.resolve((typ === 'Server' ? 'Input' : 'Output'), opcode, parts);
+			let definition	= Definitions.resolve((typ === 'Server' ? 'Input' : 'Output'), opcode, parts, packet);
 
 			if(definition === null) {
 				console.log(Chalk.hex('#FF0000')(opcode), protocol.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
@@ -66,9 +58,17 @@ class Main {
 			// CLI-Mode
 			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
 			
+			if (opcode == ':' || opcode == 'q') {
+				let generic = genericTree.read(packet, 2);
+				console.log('GenericTest', typ, generic.getName(), generic.values);
+
+				if (opcode == ':' && generic.getName() == 'CHANGE_PROTOCOL') {
+					genericTree.updateTree(generic.get('PROTOCOL_DATA'));
+				}
+			}
 			// Send Definition to UI
 
-			return true;
+			return packet;
 		});
 		
 		this.Proxy.on('exception', (type, session, error) => {
@@ -77,6 +77,9 @@ class Main {
 		
 		this.Proxy.on('HTTP', (session, data) => {
 			//console.error('[HTTP] Request', session, data);
+		});
+		this.Proxy.on('HTTPS', (session, data) => {
+			//console.error('[HTTPS] Request', session, data);
 		});
 		
 		this.Proxy.on('disconnect', (session, type) => {
