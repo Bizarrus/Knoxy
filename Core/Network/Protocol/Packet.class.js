@@ -7,7 +7,7 @@ export default (new class Packet {
 
         let first = (rawFirst & 0x80) ? rawFirst - 256 : rawFirst;
 
-        let length;
+        let length = 0;
         if (first >= 0) {
             length = first + 1;
         } else {
@@ -44,11 +44,11 @@ export default (new class Packet {
         }
 
         if (encodeKey && encodeKey.length) {
-            for (let i = 0; i < message.length; i++) {
-				if (i < encodeKey.length) {
-					message[i] = (message[i] ^ encodeKey[i]);
-				}
-			}
+            const msg = Buffer.from(message); // copy
+            for (let i = 0; i < msg.length && i < encodeKey.length; i++) {
+                msg[i] ^= encodeKey[i];
+            }
+            message = msg;
 		}
         
         const length    = ((extraData && extraData.length ? extraData.length : 0) + message.length) - 1;

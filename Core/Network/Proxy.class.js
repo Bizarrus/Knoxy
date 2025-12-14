@@ -49,12 +49,12 @@ export default class Proxy extends Events.EventEmitter {
             };
 
             const sendPacket = (socket, crypto, packetString, encodeKey = null) => {
-                let buffer = Huffman.compress(Buffer.from(packetString, 'utf8'));
+                let buffer = Huffman.compress(packetString);
 
                 if (crypto && crypto.hasAesKey()) {
                     if (encodeKey) {
                         for (let i = 0; i < buffer.length; i++) {
-                            buffer[i] ^= (i < encodeKey.length ? encodeKey[i] : 0);
+                            buffer[i] ^= (i < encodeKey.length ? encodeKey[i] : 0) & 0xFF;
                         }
                     }
                     buffer = crypto.encrypt(buffer);

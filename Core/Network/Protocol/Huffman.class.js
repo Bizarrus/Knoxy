@@ -40,7 +40,7 @@ class BitStream {
     }
 
     isAvailable() {
-        return this.bitIndex !== this.bitBuffer.length || this.byteIndex !== 0;
+        return !(this.bitIndex === this.bitBuffer.length && this.byteIndex === 0);
     }
 
     addBit(bit) {
@@ -60,8 +60,9 @@ class BitStream {
     }
 
     addBits(value, len) {
+        value = value | 0; // force int32
         for (let j = 0; j < len; j++) {
-            this.addBit((value >> j) & 1);
+            this.addBit((value >>> j) & 1);
         }
     }
 
