@@ -1,6 +1,6 @@
 {
 	"opcode":		"u",
-	"description":	"",
+	"description":	"deprecated",
 	"parameters":	[
 		{
 			"name": "Channel",

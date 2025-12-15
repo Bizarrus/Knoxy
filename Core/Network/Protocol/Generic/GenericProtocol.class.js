@@ -152,19 +152,23 @@ export default class GenericProtocol {
   getValues() {
     return this.#getValues(this);
   }
-  #getValues(value) {
-    if (value instanceof GenericProtocol) {
-      return Object.fromEntries(
-        [...value.values].map(([k, v]) => [k, this.#getValues(v)])
-      );
-    }
-
-    if (Array.isArray(value)) {
-      return value.map(this.#getValues);
-    }
-
-    return value;
+#getValues(value) {
+  if (value instanceof GenericProtocol) {
+    return Object.fromEntries(
+      [...value.values].map(([k, v]) => [
+        k,
+        v == null ? v : this.#getValues(v)
+      ])
+    );
   }
+
+  if (Array.isArray(value)) {
+    return value.map(v => this.#getValues(v)); // ✅ FIX
+  }
+
+  return value;
+}
+
 
   getSize() {
     return this.values.size;
@@ -396,5 +400,13 @@ export default class GenericProtocol {
           }
       }
   }
+
+  toJSON() {
+    return {
+      Name: this.getName(),
+      Values: this.getValues()
+    };
+  }
+
 
 }

@@ -38,12 +38,54 @@
 			"name": "BackgroundImagePosition",
 			"type": "Integer"
 		},
+
 		{
-			"name": "Style",
-			"type": "ChannelStyle"
+			"name": "Unknown",
+			"type": "String"
 		},
 		{
+			"name": "ForegroundColor",
+			"type": "String"
+		},
+		{
+			"name": "BackgroundColor",
+			"type": "String"
+		},
+		{
+			"name": "RedColor",
+			"type": "String"
+		},
+		{
+			"name": "BlueColor",
+			"type": "String"
+		},
+		{
+			"name": "FontSize",
+			"type": "Integer"
+		},
+		{
+			"name": "LineSpace",
+			"type": "Integer"
+		},
+		{
+			"name": "UserlistFontSize",
+			"type": "Integer"
+		},
+		{
+			"name": "UserlistBackgroundColor",
+			"type": "Integer"
+		},
+		
+		{
 			"name": "ComboBox",
+			"type": "Boolean"
+		},
+		{
+			"name": "ComboBox Value",
+			"type": "String"
+		},
+		{
+			"name": "Unknown1",
 			"type": "Boolean"
 		},
 		{
@@ -63,7 +105,23 @@
 			"type": "Boolean"
 		},
 		{
-			"name": "ButtonSearch",
+			"name": "ButtonMessages",
+			"type": "Boolean:Integer"
+		},
+		{
+			"name": "Unknown2",
+			"type": "String"
+		},
+		{
+			"name": "TemporaryPassword",
+			"type": "String"
+		},
+		{
+			"name": "Unknown3",
+			"type": "Boolean"
+		},
+		{
+			"name": "Unknown4",
 			"type": "Boolean"
 		}
 	]

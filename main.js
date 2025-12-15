@@ -6,6 +6,7 @@ import Chalk from 'chalk';
 import {template} from 'chalk-template';
 import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import fs from 'node:fs';
+import util from 'node:util';
 
 class Main {
 	Configuration = {
@@ -43,7 +44,7 @@ class Main {
 			let definition	= Definitions.resolve((typ === 'Server' ? 'Input' : 'Output'), opcode, parts, packet);
 
 			if(definition === null) {
-				console.log(Chalk.hex('#FF0000')(opcode), protocol.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
+				console.log(Chalk.hex('#FF0000')(opcode), packet.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
 					let hex = char.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase();
 
 					if(hex === '00') {
@@ -54,15 +55,21 @@ class Main {
 				}));
 				return true;
 			}
-			
-			// CLI-Mode
-			// console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
-			
-			if (opcode == ':' || opcode == 'q') {
-				console.log('ry read', packet);
-				let generic = genericTree.read(packet, 2);
-				console.log('GenericTest', typ, generic.getName(), generic.getValues());
 
+			// CLI-Mode
+			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
+			let generic = null;
+			if (opcode == ':' || opcode == 'q') {
+				generic = genericTree.read(packet, 2);
+
+				try {
+					console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(
+						util.inspect(generic.toJSON(), { colors: true, depth: null, compact: false }
+					)));
+				} catch (e) {
+					console.error(e);
+				}
+			
 				if (opcode == ':' && generic.getName() == 'CHANGE_PROTOCOL') {
 					genericTree.updateTree(generic.get('PROTOCOL_DATA'));
 					console.info('Protocol changed', genericTree.hash);
@@ -73,7 +80,6 @@ class Main {
 					console.log('FAIL   ', generic.getName());
 					console.log('       ', Buffer.from(packet).toString('hex'))
 					console.log('       ', Buffer.from(p).toString('hex'))
-					
 				}
 			}
 			// Send Definition to UI
@@ -82,14 +88,14 @@ class Main {
 		});
 		
 		this.Proxy.on('exception', (type, session, error) => {
-			//console.error('[Error] on ' + type + ':', session, error);
+			console.error('[Error] on ' + type + ':', session, error);
 		});
 		
-		this.Proxy.on('HTTP', (session, data) => {
-			console.error('[HTTP] Request', session, data);
+		this.Proxy.on('HTTP', (session, typ, data) => {
+			//console.error('[HTTP] Request', session, typ, data.toString('utf8'));
 		});
-		this.Proxy.on('HTTPS', (session, data) => {
-			console.error('[HTTPS] Request', session, data);
+		this.Proxy.on('HTTPS', (session, typ, data) => {
+			//console.error('[HTTPS] Request', session, typ, data);
 		});
 		
 		this.Proxy.on('disconnect', (session, type) => {

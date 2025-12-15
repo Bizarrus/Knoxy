@@ -76,7 +76,7 @@ export default class Proxy extends Events.EventEmitter {
                         				data[2] >= 0x00 && data[2] <= 0x04;
                     
 					onlyTunnel = true;
-                    this.emit(isHttps ? 'HTTPS' : 'HTTP', ID, data);
+                    this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Client', ID, data);
                     Server.write(data);
                     return;
                 }
@@ -141,7 +141,7 @@ export default class Proxy extends Events.EventEmitter {
                         				data[2] >= 0x00 && data[2] <= 0x04;
                     
 					onlyTunnel = true;
-                    this.emit(isHttps ? 'HTTPS' : 'HTTP', ID, data);
+                    this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Server', ID, data);
                     Client.write(data);
                     return;
                 }

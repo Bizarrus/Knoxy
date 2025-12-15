@@ -1,0 +1,30 @@
+{
+	"opcode":		"+",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Unk",
+			"type": "Boolean"
+		},
+		{
+			"name": "URL",
+			"type": "String"
+		},
+		{
+			"name": "Password-Key",
+			"type": "String"
+		},
+		{
+			"name": "Password-Value",
+			"type": "String"
+		},
+		{
+			"name": "Nickname-Key",
+			"type": "String"
+		},
+		{
+			"name": "Nickname-Value",
+			"type": "String"
+		}
+	]
+}
