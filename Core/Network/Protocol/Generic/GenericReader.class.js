@@ -1,7 +1,6 @@
 export default class GenericReader {
     constructor(data, position = 0) {
         if (typeof data === 'string') {
-            // Java String = UTF-16 char array
             this.stringData = data;
             this.byteData = null;
             this.length = data.length;
@@ -12,27 +11,25 @@ export default class GenericReader {
         } else {
             throw new Error('Invalid GenericReader input');
         }
-
         this.position = position;
     }
 
-    /* read() */
     read() {
         return this.position === this.length ? -1 : (this.readByte() & 0xFF);
     }
 
     readBuffer(buffer, offset = 0, length = buffer.length) {
         for (let i = 0; i < length; i++) {
-            buffer[offset + i] = this.readByte();
+            buffer[offset + i] = this.readByte() & 0xFF;
         }
     }
 
     readByte() {
         if (this.byteData === null) {
-            // Java: (byte) string.charAt()
-            return this.stringData.charCodeAt(this.position++) & 0xFF;
+            const c = this.stringData.charCodeAt(this.position++);
+            return (c << 24) >> 24;
         } else {
-            return this.byteData[this.position++];
+            return (this.byteData[this.position++] << 24) >> 24;
         }
     }
 
@@ -48,19 +45,6 @@ export default class GenericReader {
         }
     }
 
-    /* readDouble() */
-    readDouble() {
-        const buf = Buffer.allocUnsafe(8);
-        for (let i = 0; i < 8; i++) buf[i] = this.readByte();
-        return buf.readDoubleBE(0);
-    }
-
-    readFloat() {
-        const buf = Buffer.allocUnsafe(4);
-        for (let i = 0; i < 4; i++) buf[i] = this.readByte();
-        return buf.readFloatBE(0);
-    }
-
     readInt() {
         const b1 = this.readByte() & 0xFF;
         const b2 = this.readByte() & 0xFF;
@@ -70,15 +54,33 @@ export default class GenericReader {
     }
 
     readLong() {
-        let result = 0n;
+        let r = 0n;
         for (let i = 0; i < 8; i++) {
-            result = (result << 8n) | BigInt(this.readByte() & 0xFF);
+            r = (r << 8n) | BigInt(this.readByte() & 0xFF);
         }
-        return result;
+        if (r & (1n << 63n)) r -= 1n << 64n;
+        return r;
+    }
+
+    readFloat() {
+        const v = this.readInt();
+        const buf = Buffer.allocUnsafe(4);
+        buf.writeInt32BE(v, 0);
+        return buf.readFloatBE(0);
+    }
+
+    readDouble() {
+        let v = this.readLong();
+        if (v < 0) v += 1n << 64n;
+        const buf = Buffer.allocUnsafe(8);
+        buf.writeBigUInt64BE(v, 0);
+        return buf.readDoubleBE(0);
     }
 
     readShort() {
-        return ((this.read() << 8) | this.read()) & 0xFFFF;
+        let v = (this.read() << 8) | this.read();
+        if (v & 0x8000) v -= 0x10000;
+        return v;
     }
 
     readUnsignedByte() {
@@ -89,39 +91,73 @@ export default class GenericReader {
         return this.readShort() & 0xFFFF;
     }
 
+    readBuffer(buffer, offset = 0, length = buffer.length) {
+        for (let i = 0; i < length; i++) {
+            buffer[offset + i] = this.readByte() & 0xFF;
+        }
+    }
+
     readUTF() {
         const utfLength = this.readUnsignedShort();
+
         const byteArray = Buffer.allocUnsafe(utfLength);
         this.readBuffer(byteArray, 0, utfLength);
 
-        let out = '';
-        let i = 0;
+        // Java: char[] charArray = new char[utfLength];
+        const charArray = new Array(utfLength).fill('\u0000');
 
-        while (i < utfLength) {
-            const c = byteArray[i] & 0xFF;
-            if (c < 0x80) {
-                out += String.fromCharCode(c);
-                i++;
-            } else if ((c >> 4) === 12 || (c >> 4) === 13) {
-                const c2 = byteArray[i + 1];
-                out += String.fromCharCode(
-                    ((c & 0x1F) << 6) | (c2 & 0x3F)
+        let count = 0;
+        let chararrCount = 0;
+
+        // while (count < utfLength) { c = byteArray[count] & 0xff; if (c > 127) break; ... }
+        while (count < utfLength) {
+            const c = byteArray[count] & 0xFF;
+            if (c > 127) break;
+            count++;
+            charArray[chararrCount++] = String.fromCharCode(c);
+        }
+
+        while (count < utfLength) {
+            const c = byteArray[count] & 0xFF;
+
+            switch (c >> 4) {
+            case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
+                count++;
+                charArray[chararrCount++] = String.fromCharCode(c);
+                break;
+            }
+
+            case 12:
+            case 13: {
+                count += 2;
+                if (count > utfLength) throw new Error("[Error] malformed input: partial character at end");
+                const char2 = byteArray[count - 1];
+                if ((char2 & 0xC0) !== 0x80) throw new Error("[Error] malformed input around byte " + count);
+                charArray[chararrCount++] = String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+                break;
+            }
+
+            case 14: {
+                count += 3;
+                if (count > utfLength) throw new Error("[Error] malformed input: partial character at end");
+                const char2 = byteArray[count - 2];
+                const char3 = byteArray[count - 1];
+                if (((char2 & 0xC0) !== 0x80) || ((char3 & 0xC0) !== 0x80)) {
+                throw new Error("[Error] malformed input around byte " + (count - 1));
+                }
+                charArray[chararrCount++] = String.fromCharCode(
+                ((c & 0x0F) << 12) |
+                ((char2 & 0x3F) << 6) |
+                ((char3 & 0x3F) << 0)
                 );
-                i += 2;
-            } else if ((c >> 4) === 14) {
-                const c2 = byteArray[i + 1];
-                const c3 = byteArray[i + 2];
-                out += String.fromCharCode(
-                    ((c & 0x0F) << 12) |
-                    ((c2 & 0x3F) << 6) |
-                    (c3 & 0x3F)
-                );
-                i += 3;
-            } else {
-                throw new Error('Malformed UTF');
+                break;
+            }
+
+            default:
+                throw new Error("[Error] malformed input around byte " + count);
             }
         }
-        return out;
+        return charArray.join('');
     }
 
     skipBytes(n) {

@@ -24,6 +24,7 @@ export default class Proxy extends Events.EventEmitter {
             const cStream = new ChunkedInputStream();
             const sStream = new ChunkedInputStream();
 
+			let onlyTunnel		= false;
             let sessionType     = null;
             let cryptoServer    = null;
             let cryptoClient    = null;
@@ -69,11 +70,12 @@ export default class Proxy extends Events.EventEmitter {
 			/* Incoming Data */
             Client.on('data', (data) => {
                 // HTTP/S direkt durch
-                if (data.toString('utf8').startsWith(Buffer.from('HTTP/')) ||
+                if (onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) ||
                     data.length >= 3 && data[0] == 0x16 && (data[1] == 0x03)) {
 						const isHttps = data[0] == 0x16 && data[1] == 0x03 && 
                         				data[2] >= 0x00 && data[2] <= 0x04;
                     
+					onlyTunnel = true;
                     this.emit(isHttps ? 'HTTPS' : 'HTTP', ID, data);
                     Server.write(data);
                     return;
@@ -133,11 +135,12 @@ export default class Proxy extends Events.EventEmitter {
             });
             Server.on('data', (data) => { 
                 // HTTP/S direkt durch
-                if (data.toString('utf8').startsWith(Buffer.from('HTTP/')) ||
+                if (onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) ||
                     data.length >= 3 && data[0] == 0x16 && (data[1] == 0x03)) {
 						const isHttps = data[0] == 0x16 && data[1] == 0x03 && 
                         				data[2] >= 0x00 && data[2] <= 0x04;
                     
+					onlyTunnel = true;
                     this.emit(isHttps ? 'HTTPS' : 'HTTP', ID, data);
                     Client.write(data);
                     return;
@@ -184,6 +187,7 @@ export default class Proxy extends Events.EventEmitter {
                 decodeKey = null;
                 cryptoClient = null;
                 cryptoServer = null;
+				onlyTunnel = false;
 
                 Client.destroy();
                 Server.destroy();

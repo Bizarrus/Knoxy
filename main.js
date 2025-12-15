@@ -56,15 +56,24 @@ class Main {
 			}
 			
 			// CLI-Mode
-			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
+			// console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
 			
 			if (opcode == ':' || opcode == 'q') {
+				console.log('ry read', packet);
 				let generic = genericTree.read(packet, 2);
-				const values = Object.fromEntries(generic.values);
-				console.log('GenericTest', typ, generic.getName(), Array.from(generic.values));
+				console.log('GenericTest', typ, generic.getName(), generic.getValues());
 
 				if (opcode == ':' && generic.getName() == 'CHANGE_PROTOCOL') {
 					genericTree.updateTree(generic.get('PROTOCOL_DATA'));
+					console.info('Protocol changed', genericTree.hash);
+				}
+ 
+				const p = opcode + '\0' + genericTree.write(generic);
+				if (p !== packet) {
+					console.log('FAIL   ', generic.getName());
+					console.log('       ', Buffer.from(packet).toString('hex'))
+					console.log('       ', Buffer.from(p).toString('hex'))
+					
 				}
 			}
 			// Send Definition to UI
@@ -77,10 +86,10 @@ class Main {
 		});
 		
 		this.Proxy.on('HTTP', (session, data) => {
-			//console.error('[HTTP] Request', session, data);
+			console.error('[HTTP] Request', session, data);
 		});
 		this.Proxy.on('HTTPS', (session, data) => {
-			//console.error('[HTTPS] Request', session, data);
+			console.error('[HTTPS] Request', session, data);
 		});
 		
 		this.Proxy.on('disconnect', (session, type) => {
