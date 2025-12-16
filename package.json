@@ -7,12 +7,13 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "proxy": "node ./main.js",
+    "proxy": "electron ./main.js",
     "client": "%USERPROFILE%/Knuddels-Stapp/CommonFiles/Java/bin/javaw.exe -noverify -client -jar %USERPROFILE%/Knuddels-Stapp/kjupdate.jar localhost 2710",
     "start": "npm run proxy && npm run client"
   },
   "dependencies": {
     "chalk": "^5.6.2",
-    "chalk-template": "^1.1.0"
+    "chalk-template": "^1.1.0",
+    "electron": "^39.2.7"
   }
 }

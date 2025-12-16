@@ -9,6 +9,14 @@
 		{
 			"name": "Suggestion",
 			"type": "string"
+		},
+		{
+			"name": "Decode-Key",
+			"type": "string"
+		},
+		{
+			"name": "DH-Key",
+			"type": "string"
 		}
 	]
 }

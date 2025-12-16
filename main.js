@@ -1,12 +1,17 @@
 import Proxy from './Core/Network/Proxy.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
-import Bundle from './Core/Network/Protocol/Packet.class.js';
-import Huffman from './Core/Network/Protocol/Huffman.class.js';
+import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import Chalk from 'chalk';
 import {template} from 'chalk-template';
-import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import fs from 'node:fs';
 import util from 'node:util';
+
+import { app, BrowserWindow, ipcMain } from "electron";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class Main {
 	Configuration = {
@@ -21,7 +26,35 @@ class Main {
 
 	constructor() {
 		this.Proxy = new Proxy(this.Configuration);
-		
+		let win;
+		app.whenReady().then(() => {
+			win = new BrowserWindow({
+				width: 800,
+				height: 600,
+				webPreferences: {
+					preload: join(__dirname, "UI", "preload.js"),
+					contextIsolation: true,
+					nodeIntegration: false
+				}
+			});
+			ipcMain.on('open-log', (e, data) => {
+				console.log('OPEN', data);
+				const logWin = new BrowserWindow({
+					width: 600,
+					height: 800,
+					webPreferences: {
+					preload: join(__dirname, "UI", "preload.js")
+					}
+				});
+
+				logWin.loadFile(join(__dirname, "UI", "log.html"));
+				logWin.webContents.once("did-finish-load", () => {
+					logWin.webContents.send("log", data);
+				});
+			});
+			win.loadFile(join(__dirname, "UI", "main.html"));
+		});
+
 		this.Proxy.on('started', (port) => {
 			console.log('[Proxy] Proxy started on Port', port);
 		});
@@ -62,16 +95,12 @@ class Main {
 			if (opcode == ':' || opcode == 'q') {
 				generic = genericTree.read(packet, 2);
 
-				try {
-					console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(
-						util.inspect(generic.toJSON(), { colors: true, depth: null, compact: false }
-					)));
-				} catch (e) {
-					console.error(e);
-				}
+				console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(
+					util.inspect(generic.toJSON(), { colors: true, depth: null, compact: false }
+				)));
 			
 				if (opcode == ':' && generic.getName() == 'CHANGE_PROTOCOL') {
-					genericTree.updateTree(generic.get('PROTOCOL_DATA'));
+					genericTree.updateTree(generic.get('PROTOCOL_DATA').value);
 					console.info('Protocol changed', genericTree.hash);
 				}
  
@@ -83,6 +112,16 @@ class Main {
 				}
 			}
 			// Send Definition to UI
+			if (win) {
+				win.webContents.send("log", {
+					session: session,
+					typ: typ,
+					packet: packet,
+					hex: Buffer.from(packet).toString('hex'),
+					definition: definition,
+					generic: generic ? generic.toJSON() : undefined,
+				});
+			}
 
 			return packet;
 		});

@@ -15,7 +15,7 @@
 			"type": "string"
 		},
 		{
-			"name": "Type",
+			"name": "UseSubchannels",
 			"type": "boolean"
 		}
 	]

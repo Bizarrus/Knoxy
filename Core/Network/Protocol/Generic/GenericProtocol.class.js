@@ -1,5 +1,6 @@
 import GenericReader from "./GenericReader.class.js";
 import GenericWriter from "./GenericWriter.class.js";
+import GenericdValue from './GenericdValue.class.js';
 
 export default class GenericProtocol {
   static delimiter = ";";
@@ -152,23 +153,22 @@ export default class GenericProtocol {
   getValues() {
     return this.#getValues(this);
   }
-#getValues(value) {
-  if (value instanceof GenericProtocol) {
-    return Object.fromEntries(
-      [...value.values].map(([k, v]) => [
-        k,
-        v == null ? v : this.#getValues(v)
-      ])
-    );
+  #getValues(value) {
+    if (value instanceof GenericProtocol) {
+      const out = {};
+      for (const [k, v] of value.values) {
+        out[k] = this.#getValues(v);
+      }
+      return out;
+    }
+    if (value instanceof GenericdValue) {
+      return value.toJSON();
+    }
+    if (Array.isArray(value)) {
+      return value.map(v => this.#getValues(v));
+    }
+    return value;
   }
-
-  if (Array.isArray(value)) {
-    return value.map(v => this.#getValues(v)); // ✅ FIX
-  }
-
-  return value;
-}
-
 
   getSize() {
     return this.values.size;
@@ -256,16 +256,16 @@ export default class GenericProtocol {
       let ind = indices[i];
 
       switch (ind) {
-        case 0: return reader.readByte();
-        case 1: return reader.readBoolean();
-        case 2: return reader.readByte();
-        case 3: return reader.readShort();
-        case 4: return reader.readInt();
-        case 5: return reader.readLong();
-        case 6: return reader.readFloat();
-        case 7: return reader.readDouble();
-        case 8: return reader.readChar();
-        case 9: return GenericProtocol.decodeString(reader.readUTF());
+        case 0: return new GenericdValue('Byte', reader.readByte());
+        case 1: return new GenericdValue('Boolean', reader.readBoolean());
+        case 2: return new GenericdValue('Enum', reader.readByte());
+        case 3: return new GenericdValue('Short', reader.readShort());
+        case 4: return new GenericdValue('Integer', reader.readInt());
+        case 5: return new GenericdValue('Long', reader.readLong());
+        case 6: return new GenericdValue('Float', reader.readFloat());
+        case 7: return new GenericdValue('Double', reader.readDouble());
+        case 8: return new GenericdValue('Char', reader.readChar());
+        case 9: return new GenericdValue('UTF-String', GenericProtocol.decodeString(reader.readUTF()));
 
         case 10: throw new Error("Not implemented yet: BinaryType");
 
@@ -274,7 +274,7 @@ export default class GenericProtocol {
           ind = indices[i];
 
           const list = [];
-          node.add(this.nodeNames[ind], list);
+          node.add(this.nodeNames[ind], new GenericdValue('List', list));
 
           while (reader.readByte() === 11) {
             list.push(this.readInternal(reader, ind, null));
@@ -284,7 +284,7 @@ export default class GenericProtocol {
           break;
         }
         case 12: break;
-        case 13: return GenericProtocol.readChars(reader);
+        case 13: return new GenericdValue('String', GenericProtocol.readChars(reader));
 
         default:
           node.add(this.nodeNames[ind], this.readInternal(reader, ind, null));
@@ -309,6 +309,7 @@ export default class GenericProtocol {
       this.writeInternal(genericProtocol, index, writer);
   }
   writeInternal(object, index, writer) {
+      object =  object instanceof GenericdValue ? object.value : object;
       const indices = this.nodeIndices[index];
 
       for (let i = 0; i < indices.length; i++) {
@@ -374,6 +375,7 @@ export default class GenericProtocol {
                       break;
                   }
 
+                  list =  list instanceof GenericdValue ? list.value : list;
                   for (const obj of list) {
                       writer.writeByte(11);
                       this.writeInternal(obj, sub, writer);
@@ -407,6 +409,5 @@ export default class GenericProtocol {
       Values: this.getValues()
     };
   }
-
 
 }

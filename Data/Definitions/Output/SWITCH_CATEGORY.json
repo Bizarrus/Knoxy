@@ -11,7 +11,7 @@
 			"type": "Integer"
 		},
 		{
-			"name": "SubCategory",
+			"name": "Nickname",
 			"type": "String"
 		},
 		{
