@@ -2,6 +2,7 @@
  * @author  Bizarrus, SeBiTM
  **/
 import Proxy from './Core/Network/Proxy.class.js';
+import Plugins from './Core/Plugins.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import Chalk from 'chalk';
@@ -26,7 +27,8 @@ class Main {
 	};
 
 	constructor() {
-		this.Proxy = new Proxy(this.Configuration);
+		this.Plugins	= new Plugins();
+		this.Proxy		= new Proxy(this.Configuration, this.Plugins);
 
 		let win;
 
