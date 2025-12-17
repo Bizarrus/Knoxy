@@ -1,0 +1,22 @@
+{
+	"opcode":		"k",
+	"description":	"",
+	"parameters":	[
+		{
+			"name": "Category",
+			"type": "Integer"
+		},
+		{
+			"name": "SubCategory",
+			"type": "Integer"
+		},
+		{
+			"name": "Nickname",
+			"type": "String"
+		},
+		{
+			"name": "Password-Hash",
+			"type": "String"
+		}
+	]
+}

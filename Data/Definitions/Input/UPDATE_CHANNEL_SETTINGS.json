@@ -7,8 +7,36 @@
 			"type": "string"
 		},
 		{
-			"name": "Style",
-			"type": "ChannelStyle"
+			"name": "ForegroundColor",
+			"type": "String"
+		},
+		{
+			"name": "BackgroundColor",
+			"type": "String"
+		},
+		{
+			"name": "RedColor",
+			"type": "String"
+		},
+		{
+			"name": "BlueColor",
+			"type": "String"
+		},
+		{
+			"name": "FontSize",
+			"type": "Integer"
+		},
+		{
+			"name": "LineSpace",
+			"type": "Integer"
+		},
+		{
+			"name": "UserlistFontSize",
+			"type": "Integer"
+		},
+		{
+			"name": "UserlistBackgroundColor",
+			"type": "Integer"
 		}
 	]
 }

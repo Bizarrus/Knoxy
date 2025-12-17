@@ -1,6 +1,6 @@
 {
 	"opcode":		"l",
-	"description":	"",
+	"description":	"deprecated",
 	"parameters":	[
 		{
 			"name": "Channel",
