@@ -17,9 +17,9 @@ export default class Proxy extends Events.EventEmitter {
 
 		this.Proxy = Network.createServer((Client) => {
 			const CLIENT_IDENTIFIER		= 0x00;
-			const CRYPTO_HEADER					= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
-			const Server			= new Network.Socket();
-			const ID	= Crypto.randomUUID();
+			const CRYPTO_HEADER= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
+			const Server				= new Network.Socket();
+			const ID						= Crypto.randomUUID();
 			const cStream		= new ChunkedInputStream();
 			const sStream		= new ChunkedInputStream();
 			let onlyTunnel				= false;
