@@ -1,22 +1,22 @@
 {
 	"opcode":		"(",
-	"description":	"Connection-Initalization",
+	"description":	"Connection-Initialization",
 	"parameters":	[
 		{
 			"name": "PasswordKey",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "Suggestion",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "Decode-Key",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "DH-Key",
-			"type": "string"
+			"type": "String"
 		}
 	]
 }
