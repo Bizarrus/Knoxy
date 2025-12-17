@@ -71,8 +71,8 @@ export default class Proxy extends Events.EventEmitter {
 			/* Incoming Data */
 			Client.on('data', (data) => {
 				// HTTP/S direkt durch
-				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] == 0x16 && (data[1] == 0x03)) {
-					const isHttps	= data[0] == 0x16 && data[1] == 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
+				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] === 0x16 && (data[1] === 0x03)) {
+					const isHttps	= data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
 					onlyTunnel				= true;
 
 					this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Client', ID, data);
@@ -148,8 +148,8 @@ export default class Proxy extends Events.EventEmitter {
 
 			Server.on('data', (data) => {
 				// HTTP/S direkt durch
-				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] == 0x16 && (data[1] == 0x03)) {
-					const isHttps	= data[0] == 0x16 && data[1] == 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
+				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] === 0x16 && (data[1] === 0x03)) {
+					const isHttps	= data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
 					onlyTunnel				= true;
 
 					this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Server', ID, data);
