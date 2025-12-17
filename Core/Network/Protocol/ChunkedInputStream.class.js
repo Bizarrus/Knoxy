@@ -1,30 +1,40 @@
+/**
+ * @author  SeBiTM
+ **/
 export default class ChunkedInputStream {
-    constructor(data = null) {
-        this.buffer = data == null ? Buffer.alloc(0) : Buffer.from(data);
-    }
+	constructor(data = null) {
+		this.buffer = ((data == null) ? Buffer.alloc(0) : Buffer.from(data));
+	}
 
-    feed(chunk) {
-        if (!chunk || chunk.length === 0) return;
-        this.buffer = Buffer.concat([this.buffer, chunk]);
-    }
+	feed(chunk) {
+		if(!chunk || chunk.length === 0) {
+			return;
+		}
 
-    readByte() {
-        if (this.buffer.length === 0) return -1;
+		this.buffer = Buffer.concat([ this.buffer, chunk ]);
+	}
 
-        const b = this.buffer[0];
-        this.buffer = this.buffer.slice(1);
-        return b;
-    }
+	readByte() {
+		if(this.buffer.length === 0) {
+			return -1;
+		}
 
-    read(n) {
-        if (this.buffer.length < n) return null;
+		const b		= this.buffer[0];
+		this.buffer	= this.buffer.slice(1);
+		return b;
+	}
 
-        const out = this.buffer.slice(0, n);
-        this.buffer = this.buffer.slice(n);
-        return out;
-    }
+	read(n) {
+		if(this.buffer.length < n) {
+			return null;
+		}
 
-    available() {
-        return this.buffer.length;
-    }
+		const out	= this.buffer.slice(0, n);
+		this.buffer			= this.buffer.slice(n);
+		return out;
+	}
+
+	available() {
+		return this.buffer.length;
+	}
 }
