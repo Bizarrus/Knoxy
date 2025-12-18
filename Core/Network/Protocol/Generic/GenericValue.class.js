@@ -1,6 +1,6 @@
-/*
-* @author SeBiTM
-**/
+/**
+ * @author  SeBiTM
+ **/
 import GenericProtocol from './GenericProtocol.class.js';
 
 export default class GenericValue {
@@ -10,7 +10,7 @@ export default class GenericValue {
 	}
 
 	toJSON() {
-		if(this.type === null) {
+		if(this.type == null) {
 			throw new Error('GenericValue.toJSON() called on invalid GenericValue');
 		}
 
@@ -19,7 +19,7 @@ export default class GenericValue {
 				type:	'List',
 				value:	this.value.map(value => {
 					if(value instanceof GenericValue) {
-						return v.toJSON();
+						return value.toJSON();
 					}
 
 					// nutzt GenericProtocol.getValues()
@@ -27,14 +27,14 @@ export default class GenericValue {
 						return value.toJSON();
 					}
 
-					return value;
+					return v;
 				})
 			};
 		}
 
 		return {
 			type:	this.type,
-			value:	typeof(this.value === 'bigint') ? this.value.toString() : this.value
+			value:	(typeof(this.value) === 'bigint' ? this.value.toString() : this.value)
 		};
 	}
 }

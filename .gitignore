@@ -1,13 +1,21 @@
-logs/
+# Node.js
 node_modules/
+
+# IDE
 .idea/
+*.iml
+.vscode/
+
+# Temporary Files
+!Data/GenericTree.txt
+
+# Client Data
+logs/
 b*/
 *.java
-*.iml
 *.class
 *.jobf
 *.txt
-!Data/GenericTree.txt
 *.version
 *.lst
 *.data
@@ -15,4 +23,3 @@ b*/
 *.jar
 *.log
 *.part
-package-lock.json

@@ -1,14 +1,9 @@
-/*
- * @author SeBiTM
+/**
+ * @author  SeBiTM
  **/
 export default class ChunkedInputStream {
 	constructor(data = null) {
-		if(data === null) {
-			this.buffer = Buffer.alloc(0);
-			return;
-		}
-
-		this.buffer = Buffer.from(data);
+		this.buffer = ((data == null) ? Buffer.alloc(0) : Buffer.from(data));
 	}
 
 	feed(chunk) {
@@ -24,19 +19,19 @@ export default class ChunkedInputStream {
 			return -1;
 		}
 
-		const byte= this.buffer[0];
-		this.buffer		  = this.buffer.slice(1);
-		return byte;
+		const b		= this.buffer[0];
+		this.buffer	= this.buffer.slice(1);
+		return b;
 	}
 
-	read(length) {
-		if(this.buffer.length < length) {
+	read(n) {
+		if(this.buffer.length < n) {
 			return null;
 		}
 
-		const bytes= this.buffer.slice(0, length);
-		this.buffer					= this.buffer.slice(length);
-		return bytes;
+		const out	= this.buffer.slice(0, n);
+		this.buffer			= this.buffer.slice(n);
+		return out;
 	}
 
 	available() {

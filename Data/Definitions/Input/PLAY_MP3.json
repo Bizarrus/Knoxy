@@ -4,7 +4,7 @@
 	"parameters":	[
 		{
 			"name": "File",
-			"type": "string"
+			"type": "String"
 		}
 	]
 }

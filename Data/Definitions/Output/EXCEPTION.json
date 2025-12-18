@@ -4,15 +4,15 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "Nickname",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "Password",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "Type",

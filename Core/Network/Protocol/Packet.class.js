@@ -1,5 +1,5 @@
-/*
- * @author Bizarrus, SeBiTM
+/**
+ * @author  Bizarrus, SeBiTM
  **/
 export default (new class Packet {
 	decode(stream, decodeKey) {
@@ -13,7 +13,7 @@ export default (new class Packet {
 		let length		= 0;
 
 		if(first >= 0) {
-			length = first + 1;
+			length				= first + 1;
 		} else {
 			length				= (rawFirst & 0x1F) + 1;
 			let count	= (rawFirst & 0x60) >> 5;
@@ -29,8 +29,8 @@ export default (new class Packet {
 					return null;
 				}
 
-				b 		&= 0xFF;
-				length	+= b << ((i << 3) + 5);
+				b			&= 0xFF;
+				length		+= b << ((i << 3) + 5);
 			}
 		}
 
