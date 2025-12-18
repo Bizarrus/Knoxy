@@ -1,0 +1,208 @@
+* {
+    margin: 0;
+    padding: 0;
+    cursor: default;
+    box-sizing: border-box;
+    font-smoothing: antialiased;
+    font-smooth: always;
+    text-rendering: optimizeLegibility;
+}
+
+:not(input, textarea)::selection {
+    user-select: none;
+    background: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background: #2C3E50;
+    color: #FFFFFF;
+    padding: 1.0rem 1.5rem;
+}
+
+header h1 {
+
+}
+
+header h1 i {
+    color: #d8d8d8;
+}
+
+header h1 span {
+    position: relative;
+}
+
+header h1 span::before {
+    position: absolute;
+    content: "\F113";
+    color: #8958DF;
+    left: -21px;
+    top: 50%;
+    transform: translateY(calc(-50% - -1px));
+    font-family: bootstrap-icons;
+    font-size: 25px;
+}
+
+/* Main */
+main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Main :: Navigation */
+nav {
+    background: #34495E;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+}
+
+nav label {
+    padding: 0.3rem 1rem;
+    background: #2c3e50;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+}
+
+nav label:hover {
+    background: #1a252f;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+#logs:checked ~ nav label[for="logs"],
+#tree:checked ~ nav label[for="tree"],
+#plugins:checked ~ nav label[for="plugins"] {
+    background: #FFFFFF;
+    color: #444444;
+}
+
+/* Main :: Content */
+section {
+    flex: 1;
+    display: none;
+    overflow-y: auto;
+}
+
+#logs:checked ~ section[data-name="logs"],
+#tree:checked ~ section[data-name="tree"],
+#plugins:checked ~ section[data-name="plugins"] {
+    display: flex;
+}
+
+/* Logs */
+ui-logs {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-direction: column;
+}
+
+ui-logs ui-header {
+    display: grid;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    grid-template-columns: 155px 210px 1fr 1fr;
+    padding: 0.25rem 0;
+    cursor: default;
+    border-bottom: 1px solid #ccc;
+    flex: 0 0 auto;
+    background: #FFFFFF;
+    font-weight: bold;
+}
+
+ui-logs ui-header > div {
+    padding-left: 7px;
+}
+
+ui-logs ui-header div:last-child {
+    text-align: right;
+    font-weight: normal;
+    padding-right: 7px;
+    font-size: 0.8rem;
+}
+
+ui-logs ui-data {
+    flex: 1;
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+ui-logs ui-data ui-entry {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #ccc;
+    display: grid;
+    font-size: 0.8rem;
+    cursor: pointer !important;
+    grid-template-columns: 155px 210px 1fr;
+}
+
+ui-logs ui-data ui-entry * {
+    cursor: pointer !important;
+}
+
+ui-logs ui-data ui-entry[data-type="INPUT"] {
+    background-color: rgba(226, 255, 226, 0.65);
+}
+
+ui-logs ui-data ui-entry[data-type="OUTPUT"] {
+    background-color: rgba(255, 176, 176, 0.65);
+}
+
+ui-logs ui-data ui-entry:hover {
+    background-color: rgba(255, 184, 52, 0.65);
+}
+
+ui-logs ui-data ui-entry > div {
+    padding-left: 7px;
+}
+
+ui-logs ui-data ui-entry > div small {
+    color: #B6B7AB;
+}
+
+ui-logs ui-data ui-entry div:first-child::before {
+    content: "";
+    font-family: bootstrap-icons;
+    padding-right: 7px;
+}
+
+ui-logs ui-data ui-entry[data-type="INPUT"] div:first-child::before {
+    content: "\F126";
+    color: #005e00;
+}
+
+ui-logs ui-data ui-entry[data-type="OUTPUT"] div:first-child::before {
+    content: "\F147";
+    color: #9c0000;
+}
+
+/* Footer */
+footer {
+    background: #2c3e50;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}

@@ -10,10 +10,13 @@ import ChunkedInputStream from './Protocol/ChunkedInputStream.class.js';
 import CryptoSession from './Crypto/CryptoSession.class.js';
 
 export default class Proxy extends Events.EventEmitter {
-	constructor(config) {
+	Plugins = null;
+
+	constructor(config, plugins) {
 		super();
 
-		this.Configuration = config;
+		this.Plugins		= plugins;
+		this.Configuration	= config;
 
 		this.Proxy = Network.createServer((Client) => {
 			const CLIENT_IDENTIFIER		= 0x00;
@@ -50,7 +53,14 @@ export default class Proxy extends Events.EventEmitter {
 			};
 
 			const sendPacket = (socket, crypto, packetString, encodeKey = null) => {
-				let buffer = Huffman.compress(packetString);
+				let packet = this.Plugins.onPacket(packetString);
+
+				// Plugin has filtered the packet, so we don't send it!
+				if(packet === null) {
+					return;
+				}
+
+				let buffer = Huffman.compress(packet);
 
 				if(crypto && crypto.hasAesKey()) {
 					if(encodeKey) {
