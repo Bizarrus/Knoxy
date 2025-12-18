@@ -1,142 +1,46 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Knoxy</title>
+<html lang="de">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Knoxy</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="CSS/Icons.css" />
+		<link rel="stylesheet" href="CSS/Globals.css" />
+	</head>
+	<body>
+		<header>
+			<h1>Knoxy</h1>
+		</header>
+		<main>
+			<input type="radio" name="tabs" id="logs" checked>
+			<input type="radio" name="tabs" id="tree">
+			<input type="radio" name="tabs" id="plugins">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-  <body>
-    <header>
-        <h1>Knoxy</h1>
-    </header>
+			<nav>
+				<label for="logs">Logs</label>
+				<!--<label for="tree">Generic Tree</label>-->
+				<!--<label for="plugins">Plugins</label>-->
+			</nav>
 
-    <div id="log">
-        <div>
-            <div>Timestamp</div>
-            <div>Session</div>
-            <div>Typ</div>
-            <div>Data</div>
-        </div>
-
-    </div>
-
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-
-            font: 14px monospace, sans-serif;
-        }
-
-        header {
-            margin: 0;
-            flex: 0 0 auto;
-            background: #222;
-            color: white;
-        }
-        h1 {
-            margin: 0;
-            padding: 1rem;
-        }
-
-        #log {
-            position: relative;
-            flex: 1 1 auto;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        #log > div {
-            display: grid;
-            grid-template-columns: 155px 280px 60px 1fr;
-  
-            padding: 0.25rem 0;
-            cursor: default;
-        }
-        #log > div > div {
-            padding-left: 7px;
-            user-select: none;
-        }
-        #log > div:nth-child(1) {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: #e0e0e0;
-            font-weight: bold;
-        }
-        #log > div.client {
-            background-color: #82ff82;
-        }
-        #log > div.server {
-            background-color: #ff8282;
-        }
-        #log > div:not(#log > div:first-child):hover {
-            background-color: #f2f2f2;
-        }
-
-    </style>
-    <script>
-        const getTimestamp = () => {
-            const d = new Date();
-            const pad = (n) => n.toString().padStart(2, "0");
-            return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-        };
-        const logBox = document.getElementById("log");
-
-        window.api.onLog((data) => {
-            console.log(data);
-
-            const entry = document.createElement('div');
-            entry.__data = data;
-            
-            const timestamp = document.createElement('div');
-            timestamp.innerHTML = getTimestamp();
-            entry.append(timestamp);
-
-            const session = document.createElement('div');
-            session.innerHTML = getTimestamp();
-            entry.append(data.session);
-
-            const typ = document.createElement('div');
-            typ.innerHTML = data.typ;
-            entry.append(typ);
-
-            const paket = document.createElement('div');
-            if (!data.definition) {
-                paket.innerHTML = data.packet.replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r');
-            } else {
-                paket.innerHTML = data.definition.Name;
-                if (data.generic) {
-                    paket.innerHTML += ` [${data.generic.Name}]`;
-                }
-            }
-            entry.append(paket);
-
-            let clickTimer = null;
-            entry.onclick = (e) => {
-                if (clickTimer) return;
-
-                clickTimer = setTimeout(() => {
-                    clickTimer = null;
-                }, 200);
-            };
-            entry.ondblclick = (e) => {
-                e.preventDefault();
-
-                clearTimeout(clickTimer);
-                clickTimer = null;
-                const data = e.currentTarget.__data;
-                console.log(data);
-
-                window.api.openLog(entry.__data);
-            };
-
-            entry.className = data.typ.toLowerCase();
-            logBox.appendChild(entry);
-        });
-    </script>
-  </body>
+			<section data-name="logs">
+				<ui-logs>
+					<ui-header>
+						<div>Timestamp</div>
+						<div>Session</div>
+						<div>Data</div>
+						<div>0 Packets</div>
+					</ui-header>
+					<ui-data></ui-data>
+				</ui-logs>
+			</section>
+			<section data-name="tree">
+				tree
+			</section>
+			<section data-name="plugins">
+				plugins
+			</section>
+		</main>
+		<!--<footer></footer>-->
+		<script src="Script/UI.js"></script>
+	</body>
 </html>

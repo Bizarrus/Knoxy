@@ -8,7 +8,7 @@
   "main": "main.js",
   "scripts": {
     "proxy": "electron ./main.js",
-    "client": "%USERPROFILE%/Knuddels-Stapp/CommonFiles/Java/bin/javaw.exe -noverify -client -jar %USERPROFILE%/Knuddels-Stapp/kjupdate.jar localhost 2710",
+    "client": "%USERPROFILE%/Knuddels-Stapp/CommonFiles/Java/bin/javaw.exe -noverify -client -jar %USERPROFILE%/Knuddels-Stapp/kjupdate.jar localhost 2710 updstream=alpha",
     "start": "npm run proxy && npm run client"
   },
   "dependencies": {

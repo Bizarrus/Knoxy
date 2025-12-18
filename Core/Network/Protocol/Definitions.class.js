@@ -1,3 +1,6 @@
+/*
+ * @author Bizarrus
+ **/
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import Definition from '../../Utils/Definition.class.js';

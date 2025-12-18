@@ -43,7 +43,7 @@ class Main {
 					width: 600,
 					height: 800,
 					webPreferences: {
-					preload: join(__dirname, "UI", "preload.js")
+						preload: join(__dirname, "UI", "preload.js")
 					}
 				});
 

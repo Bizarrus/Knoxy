@@ -1,3 +1,6 @@
+/*
+ * @author SeBiTM
+ **/
 export default class GenericWriter {
     constructor(stringMode = false) {
         this.stringMode = stringMode;

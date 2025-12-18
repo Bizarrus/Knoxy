@@ -1,3 +1,6 @@
+/*
+ * @author SeBiTM
+ **/
 import crypto from 'node:crypto';
 
 // DH Prime wie in Java
