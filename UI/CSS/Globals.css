@@ -33,6 +33,29 @@ header {
     padding: 1.0rem 1.5rem;
 }
 
+header h1 {
+
+}
+
+header h1 i {
+    color: #d8d8d8;
+}
+
+header h1 span {
+    position: relative;
+}
+
+header h1 span::before {
+    position: absolute;
+    content: "\F113";
+    color: #8958DF;
+    left: -21px;
+    top: 50%;
+    transform: translateY(calc(-50% - -1px));
+    font-family: bootstrap-icons;
+    font-size: 25px;
+}
+
 /* Main */
 main {
     display: flex;
