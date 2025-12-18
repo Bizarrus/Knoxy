@@ -1,5 +1,5 @@
-/*
- * @author Bizarrus
+/**
+ * @author  Bizarrus
  **/
 export default class Definition {
 	Name		= null;
@@ -10,7 +10,7 @@ export default class Definition {
 	constructor(name, json) {
 		this.Name		= name;
 		this.Opcode		= json.opcode;
-		this.Parameters	= json.parameters;
+		this.Parameters = json.parameters;
 	}
 
 	getName() {

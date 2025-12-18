@@ -3,6 +3,6 @@
 	"description":	"Listet alle System-Bots mit Namen auf.",
 	"parameters":	{
 		"name": "Nickname",
-		"type": "string[]"
+		"type": "String[]"
 	}
 }

@@ -34,7 +34,6 @@
 			"name": "KnRi-Cookie",
 			"type": "String"
 		},
-
 		{
 			"name": "AllocatedMemory",
 			"type": "Integer"

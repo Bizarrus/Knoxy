@@ -1,5 +1,5 @@
-/*
- * @author SeBiTM
+/**
+ * @author  SeBiTM
  **/
 import GenericReader from './GenericReader.class.js';
 import GenericWriter from './GenericWriter.class.js';
@@ -16,29 +16,34 @@ export default class GenericProtocol {
 	values;
 
 	constructor(index = 0) {
-		if(!Number.isInteger(index)) throw new Error('Generic index is not an Integer');
-		this.index = index;
-		this.#tree = null;
-		this.#treeIndex = 0;
-		this.#byteData = null;
-		this.nodeNames = null;
-		this.nodeIndices = null;
-		this.nodeValues = null;
-		this.values = new Map();
-		this.hash = null;
+		if(!Number.isInteger(index)) {
+			throw new Error('Generic index is not an Integer');
+		}
+
+		this.index			= index;
+		this.#tree			= null;
+		this.#treeIndex		= 0;
+		this.#byteData		= null;
+		this.nodeNames		= null;
+		this.nodeIndices	= null;
+		this.nodeValues		= null;
+		this.values			= new Map();
+		this.hash			= null;
 	}
 
 	static parseTree(tree = null) {
 		const base = new GenericProtocol(0);
+
 		base.updateTree(tree);
+
 		return base;
 	}
 
 	updateTree(tree) {
 		this.reset(tree);
 
-		this.hash = this.next(GenericProtocol.delimiter);
-		this.index = this.nextInt(GenericProtocol.delimiter);
+		this.hash	= this.next(GenericProtocol.delimiter);
+		this.index	= this.nextInt(GenericProtocol.delimiter);
 
 		for(let i = 0; i < this.index; i++) {
 			this.nodeNames.push(null);
@@ -53,6 +58,7 @@ export default class GenericProtocol {
 			if(this.nodeValues.has(this.nodeNames[i])) {
 				this.nodeValues.delete(this.nodeNames[i]);
 			}
+
 			this.nodeValues.set(this.nodeNames[i], i);
 		}
 
@@ -72,7 +78,9 @@ export default class GenericProtocol {
 			const indices = this.nodeIndices[i];
 
 			for(const t of indices) {
-				if(t !== 0) continue;
+				if(t !== 0) {
+					continue;
+				}
 
 				const map = new Map();
 
@@ -85,6 +93,7 @@ export default class GenericProtocol {
 		}
 
 		this.reset(null);
+
 		return this;
 	}
 
@@ -92,11 +101,11 @@ export default class GenericProtocol {
 		this.#treeIndex = 0;
 
 		if(tree != null) {
-			this.#tree = tree;
-			this.nodeIndices = [];
-			this.nodeNames = [];
-			this.nodeValues = new Map();
-			this.values = new Map();
+			this.#tree			= tree;
+			this.nodeIndices	= [];
+			this.nodeNames		= [];
+			this.nodeValues		= new Map();
+			this.values			= new Map();
 		}
 	}
 
@@ -104,8 +113,8 @@ export default class GenericProtocol {
 		const nextIndex = this.#tree.indexOf(delimiter, this.#treeIndex);
 
 		if(nextIndex >= 0) {
-			const s = this.#tree.substring(this.#treeIndex, nextIndex);
-			this.#treeIndex = nextIndex + 1;
+			const s	= this.#tree.substring(this.#treeIndex, nextIndex);
+			this.#treeIndex	= nextIndex + 1;
 			return s;
 		}
 
@@ -126,35 +135,42 @@ export default class GenericProtocol {
 	}
 
 	copyRef(ref) {
-		if(typeof ref === 'string') {
-			if(!this.nodeValues.has(ref)) return null;
+		if(typeof(ref) === 'string') {
+			if(!this.nodeValues.has(ref)) {
+				return null;
+			}
 
 			ref = this.nodeValues.get(ref);
 		}
 
-		if(!Number.isInteger(ref)) return null;
+		if(!Number.isInteger(ref)) {
+			return null;
+		}
 
-		const node = new GenericProtocol(ref);
-		node.name = this.nodeNames[ref];
-		node.nodeIndices = this.nodeIndices;
-		node.nodeNames = this.nodeNames;
-		node.nodeValues = this.nodeValues;
-		node.hash = this.hash;
-		node.#byteData = this.#byteData;
+		const node	= new GenericProtocol(ref);
+		node.name					= this.nodeNames[ref];
+		node.nodeIndices			= this.nodeIndices;
+		node.nodeNames				= this.nodeNames;
+		node.nodeValues				= this.nodeValues;
+		node.hash					= this.hash;
+		node.#byteData				= this.#byteData;
 
 		return node;
 	}
 
 	add(key, value) {
-		if(this.values.has(key)) this.values.delete(key);
+		if(this.values.has(key)) {
+			this.values.delete(key);
+		}
 
 		this.values.set(key, value);
-
 		return this;
 	}
 
 	get(key) {
-		if(!this.values.has(key)) return null;
+		if(!this.values.has(key)) {
+			return null;
+		}
 
 		return this.values.get(key);
 	}
@@ -198,36 +214,53 @@ export default class GenericProtocol {
 	}
 
 	getValue(nodeName, key) {
-		if(!this.nodeValues.has(nodeName)) return -1;
+		if(!this.nodeValues.has(nodeName)) {
+			return -1;
+		}
 
 		const dic = this.nodeValues.get(nodeName);
 
-		if(!(dic instanceof Map)) return -1;
+		if(!(dic instanceof Map)) {
+			return -1;
+		}
 
-		if(!dic.has(key)) return -1;
+		if(!dic.has(key)) {
+			return -1;
+		}
 
 		return dic.get(key);
 	}
 
 	static encodeString(value) {
-		if(value == null) return '\u0000';
+		if(value == null) {
+			return '\u0000';
+		}
 
-		if(value.startsWith('\u0000')) return '\u0000' + value;
+		if(value.startsWith('\u0000')) {
+			return '\u0000' + value;
+		}
 
 		return value;
 	}
 
 	static decodeString(value) {
-		if(value == null || value.length === 0 || value.charAt(0) !== '\u0000') return value;
+		if(value === null || value.length === 0 || value.charAt(0) !== '\u0000') {
+			return value;
+		}
 
-		if(value.length === 1) return null;
+		if(value.length === 1) {
+			return null;
+		}
 
 		return value.substring(1);
 	}
 
 	static readChars(reader) {
 		let length = reader.readUnsignedByte();
-		if(length === 255) return null;
+
+		if(length === 255) {
+			return null;
+		}
 
 		if(length >= 128) {
 			length = ((length & 0x7f) << 16) | (reader.readUnsignedByte() << 8) | reader.readUnsignedByte();
@@ -272,8 +305,8 @@ export default class GenericProtocol {
 	}
 
 	readReader(reader) {
-		const index = reader.readShort();
-		const node = this.copyRef(index);
+		const index					= reader.readShort();
+		const node	= this.copyRef(index);
 
 		if(this.readInternal(reader, index, node) !== node) {
 			throw new Error('Tokens mapped directly to a primitive value can not be encoded');
@@ -283,11 +316,15 @@ export default class GenericProtocol {
 	}
 
 	readInternal(reader, index, node) {
-		if(node == null) node = this.copyRef(index);
+		if(node == null) {
+			node = this.copyRef(index);
+		}
 
-		const indices = node.nodeIndices[index]
+		const indices = node.nodeIndices[index];
 
-		if(!indices) throw new Error(`No nodeIndices for index=${index} name=${node.nodeNames?.[index]}`);
+		if(!indices) {
+			throw new Error(`No nodeIndices for index=${index} name=${node.nodeNames?.[index]}`);
+		}
 
 		for(let i = 0; i < indices.length; i++) {
 			let ind = indices[i];
@@ -313,15 +350,13 @@ export default class GenericProtocol {
 					return new GenericValue('Char', reader.readChar());
 				case 9:
 					return new GenericValue('UTF-String', GenericProtocol.decodeString(reader.readUTF()));
-
 				case 10:
 					throw new Error('Not implemented yet: BinaryType');
-
 				case 11: {
 					i++;
-					ind = indices[i];
+					ind 				= indices[i];
+					const list	= [];
 
-					const list = [];
 					node.add(this.nodeNames[ind], new GenericValue('List', list));
 
 					while(reader.readByte() === 11) {
@@ -332,13 +367,13 @@ export default class GenericProtocol {
 					break;
 				}
 				case 12:
-					break;
+					/* Do Nothing */
+				break;
 				case 13:
 					return new GenericValue('String', GenericProtocol.readChars(reader));
-
 				default:
 					node.add(this.nodeNames[ind], this.readInternal(reader, ind, null));
-					break;
+				break;
 			}
 		}
 
@@ -347,7 +382,9 @@ export default class GenericProtocol {
 
 	write(genericProtocol, asString = true) {
 		const writer = new GenericWriter(asString);
+
 		this.writeWriter(genericProtocol, genericProtocol.index, writer);
+
 		return asString ? writer.toString() : writer.toBuffer();
 	}
 
@@ -357,12 +394,13 @@ export default class GenericProtocol {
 		}
 
 		writer.writeShort(index);
+
 		this.writeInternal(genericProtocol, index, writer);
 	}
 
 	writeInternal(object, index, writer) {
-		object = object instanceof GenericValue ? object.value : object;
-		const indices = this.nodeIndices[index];
+		object			= ((object instanceof GenericValue) ? object.value : object);
+		const indices	= this.nodeIndices[index];
 
 		for(let i = 0; i < indices.length; i++) {
 			let t = indices[i];
@@ -370,55 +408,44 @@ export default class GenericProtocol {
 			switch(t) {
 				case 0:
 					writer.writeByte(object == null ? 0 : object);
-					break;
-
+				break;
 				case 1:
 					writer.writeBoolean(object != null && object === true);
-					break;
-
+				break;
 				case 2:
 					writer.writeByte(object == null ? 0 : object);
-					break;
-
+				break;
 				case 3:
 					writer.writeShort(object == null ? 0 : object);
-					break;
-
+				break;
 				case 4:
 					writer.writeInt(object == null ? 0 : object);
-					break;
-
+				break;
 				case 5:
 					writer.writeLong(object == null ? 0n : BigInt(object));
-					break;
-
+				break;
 				case 6:
 					writer.writeFloat(object == null ? 0 : object);
-					break;
-
+				break;
 				case 7:
 					writer.writeDouble(object == null ? 0 : object);
-					break;
-
+				break;
 				case 8:
 					writer.writeChar(object == null ? 0 : object);
-					break;
-
+				break;
 				case 9:
 					writer.writeUTF(GenericProtocol.encodeString(object));
-					break;
-
+				break;
 				case 10:
 					throw new Error('Not implemented yet: BinaryType');
-
 				case 11: {
 					i++;
-					const sub = indices[i];
-					let list = null;
+					const sub		= indices[i];
+					let list	= null;
 
 					if(object != null) {
-						const name = this.nodeNames[sub];
-						list = object.get(name);
+						const name	= this.nodeNames[sub];
+						list		= object.get(name);
 					}
 
 					if(!list) {
@@ -427,7 +454,7 @@ export default class GenericProtocol {
 						break;
 					}
 
-					list = list instanceof GenericValue ? list.value : list;
+					list = ((list instanceof GenericValue) ? list.value : list);
 
 					for(const obj of list) {
 						writer.writeByte(11);
@@ -438,17 +465,15 @@ export default class GenericProtocol {
 					i++;
 					break;
 				}
-
 				case 12:
-					break;
-
+					/* Do Nothing */
+				break;
 				case 13:
 					GenericProtocol.writeChars(writer, object);
-					break;
-
+				break;
 				default: {
-					const name = this.nodeNames[t];
-					const next = object ? object.get(name) : null;
+					const name			= this.nodeNames[t];
+					const next = (object ? object.get(name) : null);
 					this.writeInternal(next, t, writer);
 					break;
 				}
@@ -458,9 +483,8 @@ export default class GenericProtocol {
 
 	toJSON() {
 		return {
-			Name: this.getName(),
-			Values: this.getValues()
+			Name:	this.getName(),
+			Values:	this.getValues()
 		};
 	}
-
 }

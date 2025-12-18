@@ -4,11 +4,11 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "string"
+			"type": "String"
 		},
 		{
 			"name": "Reason",
-			"type": "string"
+			"type": "String"
 		}
 	]
 }

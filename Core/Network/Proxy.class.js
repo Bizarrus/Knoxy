@@ -1,32 +1,35 @@
-/*
- * @author Bizarrus, SeBiTM
+/**
+ * @author  Bizarrus, SeBiTM
  **/
 import Network from 'node:net';
 import Crypto from 'node:crypto';
 import * as Events from 'node:events';
 import Packet from './Protocol/Packet.class.js';
-import Huffman from './Protocol/Comprimizer/Huffman.class.js';
+import Huffman from './Protocol/Compressor/Huffman.class.js';
 import ChunkedInputStream from './Protocol/ChunkedInputStream.class.js';
 import CryptoSession from './Crypto/CryptoSession.class.js';
 
 export default class Proxy extends Events.EventEmitter {
-	constructor(config) {
+	Plugins = null;
+
+	constructor(config, plugins) {
 		super();
 
-		this.Configuration = config;
+		this.Plugins		= plugins;
+		this.Configuration	= config;
 
 		this.Proxy = Network.createServer((Client) => {
-			const CLIENT_IDENTIFIER = 0x00;
-			const CRYPTO_HEADER = Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
-			const Server = new Network.Socket();
-			const ID = Crypto.randomUUID();
-			const cStream = new ChunkedInputStream();
-			const sStream = new ChunkedInputStream();
-			let onlyTunnel = false;
-			let sessionType = null;
-			let cryptoServer = null;
-			let cryptoClient = null;
-			let decodeKey = null;
+			const CLIENT_IDENTIFIER		= 0x00;
+			const CRYPTO_HEADER= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
+			const Server				= new Network.Socket();
+			const ID						= Crypto.randomUUID();
+			const cStream		= new ChunkedInputStream();
+			const sStream		= new ChunkedInputStream();
+			let onlyTunnel				= false;
+			let sessionType				= null;
+			let cryptoServer				= null;
+			let cryptoClient				= null;
+			let decodeKey					= null;
 
 			/* Incoming Connection */
 			Server.connect(this.Configuration.Endpoint.Port, this.Configuration.Endpoint.Hostname, () => {
@@ -40,15 +43,24 @@ export default class Proxy extends Events.EventEmitter {
 							buffer[i] ^= (i < decKey.length ? decKey[i] : 0);
 						}
 					}
+
 					return Huffman.decompress(buffer);
 				} catch(e) {
 					this.emit('exception', ID, typ, e);
 				}
+
 				return null;
 			};
 
 			const sendPacket = (socket, crypto, packetString, encodeKey = null) => {
-				let buffer = Huffman.compress(packetString);
+				let packet = this.Plugins.onPacket(packetString);
+
+				// Plugin has filtered the packet, so we don't send it!
+				if(packet === null) {
+					return;
+				}
+
+				let buffer = Huffman.compress(packet);
 
 				if(crypto && crypto.hasAesKey()) {
 					if(encodeKey) {
@@ -70,17 +82,19 @@ export default class Proxy extends Events.EventEmitter {
 			Client.on('data', (data) => {
 				// HTTP/S direkt durch
 				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] === 0x16 && (data[1] === 0x03)) {
-					const isHttps = data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
-					onlyTunnel = true;
+					const isHttps	= data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
+					onlyTunnel				= true;
+
 					this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Client', ID, data);
 					Server.write(data);
 					return;
 				}
 
 				// ===== Client Hello / DH =====
-				if(sessionType === null) {
+				if(sessionType == null) {
 					if(data[0] === CLIENT_IDENTIFIER) {
 						cStream.feed(data.slice(1));
+
 						const bundle = Packet.decode(cStream);
 
 						if(!bundle) {
@@ -96,6 +110,7 @@ export default class Proxy extends Events.EventEmitter {
 
 							Server.write(Buffer.concat([
 								Buffer.from([ CLIENT_IDENTIFIER ]),
+
 								Packet.encode(proxyPubKey, Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]))
 							]));
 
@@ -106,7 +121,9 @@ export default class Proxy extends Events.EventEmitter {
 							sessionType = 'Huffman';
 							this.emit('sessionType', ID, sessionType);
 						}
-					} else { // reconnect fallback ohne Crypto
+
+					// reconnect fallback ohne Crypto
+					} else {
 						sessionType = 'Huffman';
 						Server.write(data);
 						return;
@@ -116,6 +133,7 @@ export default class Proxy extends Events.EventEmitter {
 				}
 
 				let bundle;
+
 				while(true) {
 					bundle = Packet.decode(cStream);
 
@@ -143,6 +161,7 @@ export default class Proxy extends Events.EventEmitter {
 				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] === 0x16 && (data[1] === 0x03)) {
 					const isHttps	= data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
 					onlyTunnel				= true;
+
 					this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Server', ID, data);
 					Client.write(data);
 					return;
@@ -163,9 +182,10 @@ export default class Proxy extends Events.EventEmitter {
 				}
 
 				let bundle;
+
 				while(true) {
-					const tempStream = new ChunkedInputStream(sStream.buffer);
-					bundle = Packet.decode(tempStream);
+					const tempStream	= new ChunkedInputStream(sStream.buffer);
+					bundle								= Packet.decode(tempStream);
 
 					if(!bundle) {
 						break;
@@ -184,7 +204,8 @@ export default class Proxy extends Events.EventEmitter {
 						this.returnEmit('packet', ID, 'Server', packet);
 						sendPacket(Client, cryptoClient, packet, decodeKey);
 
-						if(tokens[0] === '(') { // set decode key
+						// set decode key
+						if(tokens[0] === '(') {
 							decodeKey = Buffer.from(tokens[3].trim());
 						}
 					} catch(e) {
@@ -202,6 +223,7 @@ export default class Proxy extends Events.EventEmitter {
 
 				Client.destroy();
 				Server.destroy();
+
 				this.emit('disconnect', ID, source);
 			};
 
@@ -209,12 +231,12 @@ export default class Proxy extends Events.EventEmitter {
 			Server.once('close', () => closeSessions('Server'));
 
 			/* Errors */
-			Client.on('error', (error) =>
-				this.emit('exception', ID, 'Client', error)
+			Client.on('error', (e) =>
+				this.emit('exception', ID, 'Client', e)
 			);
 
-			Server.on('error', (error) =>
-				this.emit('exception', ID, 'Server', error)
+			Server.on('error', (e) =>
+				this.emit('exception', ID, 'Server', e)
 			);
 		});
 	}
