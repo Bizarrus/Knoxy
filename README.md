@@ -6,6 +6,8 @@ Knuddels Proxy only in JavaScript with integrated inspectors and plugin manageme
 - Plugin-System to hook into network packets
 - Packet inspector
 
+![](Screenshots/Preview.png)
+
 # Installation
 > npm install
 
