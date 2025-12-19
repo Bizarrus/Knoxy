@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-	onLog:		(callback) => ipcRenderer.on('log', (_, data) => callback(data)),
-	openLog:	(data) => ipcRenderer.send('open-log', data)
+	onPersistenceConfig:	(callback) => ipcRenderer.on('persistence:config', (_, data) => callback(data)),
+	onPersistenceUsers:		(callback) => ipcRenderer.on('persistence:users', (_, data) => callback(data)),
+	onLog:					(callback) => ipcRenderer.on('log', (_, data) => callback(data)),
+	openLog:				(data) => ipcRenderer.send('open-log', data)
 });
