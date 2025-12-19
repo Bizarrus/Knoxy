@@ -3,6 +3,7 @@
  **/
 import Proxy from './Core/Network/Proxy.class.js';
 import Plugins from './Core/Plugins.class.js';
+import Persistence from './Core/Utils/Deserializer/Persistence.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import Chalk from 'chalk';
@@ -38,9 +39,13 @@ class Main {
 	};
 
 	constructor() {
-		this.Plugins	= new Plugins();
+		this.Plugins		= new Plugins();
 		this.ChatProxy	= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
 		this.CardProxy	= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
+		this.Persistence	= new Persistence();
+
+		/* Loading StApp Persistence */
+		this.Persistence.load('./persistence2.data');
 
 		this.lastestUpdatedChatTree = null;
 		this.lastestUpdatedCardTree = null;
@@ -77,6 +82,11 @@ class Main {
 			});
 
 			win.loadFile(join(__dirname, 'UI', 'main.html'));
+
+			win.webContents.once('did-finish-load', () => {
+				win.webContents.send('persistence:config', this.Persistence.getConfig());
+				win.webContents.send('persistence:users', this.Persistence.getUsers());
+			});
 		});
 
 		this.ChatProxy.on('started', (port) => {
@@ -222,5 +232,8 @@ class Main {
 		}, 500);
 	}
 }
+
+
+
 
 new Main();
