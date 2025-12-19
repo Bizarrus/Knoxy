@@ -25,6 +25,15 @@ export default class Plugin {
 		return packet;
 	}
 
+	/*
+	* @param {GenericProtocol} packet
+	* @returns {GenericProtocol|null} null to stop handling the packet
+	*/
+	onGeneric(packet) {
+		/* Override Me */
+		return packet;
+	}
+
 
 	/*
 	 * Will be called, when a chat-command (/<command> <args>) is executed by the client.

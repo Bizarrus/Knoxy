@@ -17,18 +17,30 @@ const __dirname	= dirname(__filename);
 
 class Main {
 	Configuration = {
-		Proxy: {
-			Port: 2710
+		Chat: {
+			Proxy: {
+				Port: 2710
+			},
+			Endpoint: {
+				Hostname:	'chat.knuddels.de',
+				Port:		2710
+			}
 		},
-		Endpoint: {
-			Hostname:	'chat.knuddels.de',
-			Port:		2710
-		}
+		Card: {
+			Proxy: {
+				Port: 2810
+			},
+			Endpoint: {
+				Hostname:	'chat.knuddels.de',
+				Port:		2810
+			}
+		},
 	};
 
 	constructor() {
 		this.Plugins	= new Plugins();
-		this.Proxy		= new Proxy(this.Configuration, this.Plugins);
+		this.ChatProxy	= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
+		this.CardProxy	= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
 
 		let win;
 
@@ -64,22 +76,60 @@ class Main {
 			win.loadFile(join(__dirname, 'UI', 'main.html'));
 		});
 
-		this.Proxy.on('started', (port) => {
+		this.ChatProxy.on('started', (port) => {
 			console.log('[Proxy] Proxy started on Port', port);
 		});
 
-		this.Proxy.on('connected', (session) => {
+		this.ChatProxy.on('connected', (session) => {
 			//console.log('Connected to the Server:', session);
 		});
 
-		this.Proxy.on('sessionType', (session, typ) => {
+		this.ChatProxy.on('sessionType', (session, typ) => {
 			console.log(session, '[Type]', typ);
 		});
 
 		let color_swap			= true;
-		const genericTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericTree.txt').toString('utf8'));
+		const genericChatTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericChatTree.txt').toString('utf8'));
+		const genericCardTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericCardTree.txt').toString('utf8'));
 
-		this.Proxy.on('packet', (session, typ, packet) => {
+		const handleTreeUpdate = (tree, generic) => {
+			if (generic.getName() === 'CONFIRM_PROTOCOL_HASH') {
+				if (this.latestUpdatedTree) { // reuse latest stored GenericTree (after reconnect)
+					tree.updateTree(this.latestUpdatedTree);
+				}
+			} else if(generic.getName() === 'CHANGE_PROTOCOL') {
+				this.latestUpdatedTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
+				tree.updateTree(this.latestUpdatedTree);
+
+				console.info('Protocol changed', tree.hash);
+			}
+		};
+
+		// CardProxy test
+		this.CardProxy.on('packet', (session, typ, buffer) => {
+			let generic = genericCardTree.read(buffer);
+
+			handleTreeUpdate(genericCardTree, generic);
+
+			if(win) {
+				win.webContents.send('log', {
+					serverTyp:	'CARD',
+					session:	session,
+					typ:		typ,
+					packet:		buffer,
+					hex:		buffer.toString('hex'),
+					generic:	generic ? generic.toJSON() : undefined
+				});
+			}
+			console.log(typ, buffer);
+			console.log(generic.toJSON());
+			return buffer;
+		});
+		this.CardProxy.on('exception', (type, session, error) => {
+			console.error('[Error] on ' + type + ':', session, error);
+		});
+
+		this.ChatProxy.on('packet', (session, typ, packet) => {
 			let parts		= packet.split('\0');
 			let opcode		= parts[0];
 			color_swap		= !color_swap;
@@ -104,17 +154,13 @@ class Main {
 			let generic = null;
 
 			if(opcode === ':' || opcode === 'q') {
-				generic = genericTree.read(packet, 2);
+				generic = genericChatTree.read(packet, 2);
 
 				console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), { colors: true, depth: null, compact: false })));
 
-				if(opcode === ':' && generic.getName() === 'CHANGE_PROTOCOL') {
-					genericTree.updateTree(generic.get('PROTOCOL_DATA').value);
-
-					console.info('Protocol changed', genericTree.hash);
-				}
-
-				const p = opcode + '\0' + genericTree.write(generic);
+				handleTreeUpdate(genericChatTree, generic);
+				
+				const p = opcode + '\0' + genericChatTree.write(generic);
 
 				if(p !== packet) {
 					console.log('FAIL   ', generic.getName());
@@ -126,6 +172,7 @@ class Main {
 			// Send Definition to UI
 			if(win) {
 				win.webContents.send('log', {
+					serverTyp:	'CHAT',
 					session:	session,
 					typ:		typ,
 					packet:		packet,
@@ -138,25 +185,26 @@ class Main {
 			return packet;
 		});
 
-		this.Proxy.on('exception', (type, session, error) => {
+		this.ChatProxy.on('exception', (type, session, error) => {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
 
-		this.Proxy.on('HTTP', (session, typ, data) => {
+		this.ChatProxy.on('HTTP', (session, typ, data) => {
 			//console.error('[HTTP] Request', session, typ, data.toString('utf8'));
 		});
-		this.Proxy.on('HTTPS', (session, typ, data) => {
+		this.ChatProxy.on('HTTPS', (session, typ, data) => {
 			//console.error('[HTTPS] Request', session, typ, data);
 		});
 
-		this.Proxy.on('disconnect', (session, type) => {
+		this.ChatProxy.on('disconnect', (session, type) => {
 			//console.error('[Disconnect] from', session, type);
 		});
 
 		let _watcher = setInterval(() => {
 			if(Definitions.isReady()) {
 				clearInterval(_watcher);
-				this.Proxy.start();
+				this.ChatProxy.start();
+				this.CardProxy.start();
 			}
 		}, 500);
 	}
