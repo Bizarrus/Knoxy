@@ -42,6 +42,9 @@ class Main {
 		this.ChatProxy	= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
 		this.CardProxy	= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
 
+		this.lastestUpdatedChatTree = null;
+		this.lastestUpdatedCardTree = null;
+		
 		let win;
 
 		app.whenReady().then(() => {
@@ -92,15 +95,25 @@ class Main {
 		const genericChatTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericChatTree.txt').toString('utf8'));
 		const genericCardTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericCardTree.txt').toString('utf8'));
 
-		const handleTreeUpdate = (tree, generic) => {
+		const handleTreeUpdate = (tree, generic, isCard) => {
 			if (generic.getName() === 'CONFIRM_PROTOCOL_HASH') {
-				if (this.latestUpdatedTree) { // reuse latest stored GenericTree (after reconnect)
-					tree.updateTree(this.latestUpdatedTree);
+				if (isCard) {
+					if (this.lastestUpdatedCardTree) { // reuse latest stored GenericTree (after reconnect)
+						tree.updateTree(this.lastestUpdatedCardTree);
+					}
+				} else {
+					if (this.lastestUpdatedChatTree) { // reuse latest stored GenericTree (after reconnect)
+						tree.updateTree(this.lastestUpdatedChatTree);
+					}
 				}
 			} else if(generic.getName() === 'CHANGE_PROTOCOL') {
-				this.latestUpdatedTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
-				tree.updateTree(this.latestUpdatedTree);
-
+				if (isCard) {
+					this.lastestUpdatedCardTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
+					tree.updateTree(this.lastestUpdatedCardTree);
+				} else {
+					this.lastestUpdatedChatTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
+					tree.updateTree(this.lastestUpdatedChatTree);
+				}
 				console.info('Protocol changed', tree.hash);
 			}
 		};
