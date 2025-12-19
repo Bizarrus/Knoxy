@@ -19,6 +19,9 @@
 			<input type="radio" name="tabs" id="tree">
 			<input type="radio" name="tabs" id="plugins">
 
+			<input type="radio" name="innerTabs" id="chatLogs" checked>
+			<input type="radio" name="innerTabs" id="cardLogs">
+		
 			<nav>
 				<label for="logs">Logs</label>
 				<!--<label for="tree">Generic Tree</label>-->
@@ -26,15 +29,34 @@
 			</nav>
 
 			<section data-name="logs">
-				<ui-logs>
-					<ui-header>
-						<div>Timestamp</div>
-						<div>Session</div>
-						<div>Data</div>
-						<div>0 Packets</div>
-					</ui-header>
-					<ui-data></ui-data>
-				</ui-logs>
+				<nav>
+					<label for="chatLogs">Chat</label>
+					<label for="cardLogs">Card</label>
+				</nav>
+
+				<section data-name="chatLogs">
+					<ui-logs>
+						<ui-header>
+							<div>Timestamp</div>
+							<div>Session</div>
+							<div>Data</div>
+							<div>0 Packets</div>
+						</ui-header>
+						<ui-data></ui-data>
+					</ui-logs>
+				</section>
+
+				<section data-name="cardLogs">
+					<ui-logs>
+						<ui-header>
+							<div>Timestamp</div>
+							<div>Session</div>
+							<div>Data</div>
+							<div>0 Packets</div>
+						</ui-header>
+						<ui-data></ui-data>
+					</ui-logs>
+				</section>
 			</section>
 			<section data-name="tree">
 				tree

@@ -90,7 +90,10 @@ input[type="radio"] {
 
 #logs:checked ~ nav label[for="logs"],
 #tree:checked ~ nav label[for="tree"],
-#plugins:checked ~ nav label[for="plugins"] {
+#plugins:checked ~ nav label[for="plugins"],
+
+#chatLogs:checked ~ section[data-name="logs"] nav label[for="chatLogs"],
+#cardLogs:checked ~ section[data-name="logs"] nav label[for="cardLogs"] {
     background: #FFFFFF;
     color: #444444;
 }
@@ -102,10 +105,13 @@ section {
     overflow-y: auto;
 }
 
+#chatLogs:checked ~ section[data-name="logs"] section[data-name="chatLogs"],
+#cardLogs:checked ~ section[data-name="logs"] section[data-name="cardLogs"],
 #logs:checked ~ section[data-name="logs"],
 #tree:checked ~ section[data-name="tree"],
 #plugins:checked ~ section[data-name="plugins"] {
     display: flex;
+    flex-direction: column;
 }
 
 /* Logs */
@@ -206,3 +212,4 @@ footer {
     padding: 1rem;
     text-align: center;
 }
+

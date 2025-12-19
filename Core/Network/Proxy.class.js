@@ -12,7 +12,7 @@ import CryptoSession from './Crypto/CryptoSession.class.js';
 export default class Proxy extends Events.EventEmitter {
 	Plugins = null;
 
-	constructor(config, plugins) {
+	constructor(config, { parentServer, plugins }) {
 		super();
 
 		this.Plugins		= plugins;
@@ -20,16 +20,16 @@ export default class Proxy extends Events.EventEmitter {
 
 		this.Proxy = Network.createServer((Client) => {
 			const CLIENT_IDENTIFIER		= 0x00;
-			const CRYPTO_HEADER= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
+			const CRYPTO_HEADER			= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
 			const Server				= new Network.Socket();
-			const ID						= Crypto.randomUUID();
-			const cStream		= new ChunkedInputStream();
-			const sStream		= new ChunkedInputStream();
+			const ID					= Crypto.randomUUID();
+			const cStream				= new ChunkedInputStream();
+			const sStream				= new ChunkedInputStream();
 			let onlyTunnel				= false;
-			let sessionType				= null;
-			let cryptoServer				= null;
-			let cryptoClient				= null;
-			let decodeKey					= null;
+			let sessionType				= parentServer ? 'Generic' : null; // added type Generic or CardServer
+			let cryptoServer			= null;
+			let cryptoClient			= null;
+			let decodeKey				= null;
 
 			/* Incoming Connection */
 			Server.connect(this.Configuration.Endpoint.Port, this.Configuration.Endpoint.Hostname, () => {
@@ -53,14 +53,21 @@ export default class Proxy extends Events.EventEmitter {
 			};
 
 			const sendPacket = (socket, crypto, packetString, encodeKey = null) => {
-				let packet = this.Plugins.onPacket(packetString);
+				let packet = packetString;
+				if (this.Plugins) {
+					if (sessionType === 'Generic') {
+						packet = this.Plugins.onGeneric(packetString); // todo GenericProtocol.write | would it be more sensible to use plugins in main.js?
+					} else {
+						packet = this.Plugins.onPacket(packetString);
+					}
+				}
 
 				// Plugin has filtered the packet, so we don't send it!
 				if(packet === null) {
 					return;
 				}
 
-				let buffer = Huffman.compress(packet);
+				let buffer = sessionType === 'Generic' ? packet : Huffman.compress(packet);
 
 				if(crypto && crypto.hasAesKey()) {
 					if(encodeKey) {
@@ -133,7 +140,6 @@ export default class Proxy extends Events.EventEmitter {
 				}
 
 				let bundle;
-
 				while(true) {
 					bundle = Packet.decode(cStream);
 
@@ -146,7 +152,7 @@ export default class Proxy extends Events.EventEmitter {
 							bundle = cryptoClient.decrypt(bundle);
 						}
 
-						const packet = handleHuffman(bundle, 'Client', null);
+						const packet = sessionType === 'Generic' ? bundle : handleHuffman(bundle, 'Client', null);
 
 						this.returnEmit('packet', ID, 'Client', packet);
 						sendPacket(Server, cryptoServer, packet, null);
@@ -198,15 +204,17 @@ export default class Proxy extends Events.EventEmitter {
 							bundle = cryptoServer.decrypt(bundle);
 						}
 
-						const packet = handleHuffman(bundle, 'Server', decodeKey);
-						const tokens = packet.split('\0');
+						const packet = sessionType === 'Generic' ? bundle : handleHuffman(bundle, 'Server', decodeKey);
 
 						this.returnEmit('packet', ID, 'Server', packet);
 						sendPacket(Client, cryptoClient, packet, decodeKey);
 
-						// set decode key
-						if(tokens[0] === '(') {
-							decodeKey = Buffer.from(tokens[3].trim());
+						if (typeof packet === 'string') { // precess only Huffman pakets
+							const tokens = packet.split('\0');
+							// set decode key
+							if(tokens[0] === '(') {
+								decodeKey = Buffer.from(tokens[3].trim());
+							}
 						}
 					} catch(e) {
 						this.emit('exception', ID, 'Server', e);

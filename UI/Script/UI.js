@@ -1,9 +1,11 @@
 (new class UI {
-	Logs 		= null;
-	Count	= 0;
+	ChatLogs 	= null;
+	CardLogs 	= null;
+	Count		= 0;
 
 	constructor() {
-		this.Logs = document.querySelector('ui-logs ui-data');
+		this.ChatLogs = document.querySelector('section[data-name="chatLogs"] ui-logs ui-data');
+		this.CardLogs = document.querySelector('section[data-name="cardLogs"] ui-logs ui-data');
 
 		window.api.onLog((data) => this.onLog(data));
 	}
@@ -17,9 +19,9 @@
 
 	onLog(data) {
 		console.log(data);
-		document.querySelector('ui-logs ui-header div:last-child').innerText = `${++this.Count} Packets`;
+		document.querySelector(`section[data-name="${data.serverTyp.toLowerCase()}Logs"] ui-logs ui-header div:last-child`).innerText = `${++this.Count} Packets`;
 
-		const scrolling		= this.Logs.scrollTop + this.Logs.clientHeight + 20 >= this.Logs.scrollHeight;
+		const scrolling		= this.ChatLogs.scrollTop + (data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).clientHeight + 20 >= (data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
 		const entry	= document.createElement('ui-entry');
 
 		if(data.typ.toUpperCase() === 'SERVER') {
@@ -42,7 +44,12 @@
 		const paket		= document.createElement('div');
 
 		if(!data.definition) {
-			paket.innerHTML				= data.packet.replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r');
+			if(data.serverTyp === 'CARD') {
+				console.error('###');
+				paket.innerHTML				+= `${data.generic.Name}`; // todo
+			} else {
+				paket.innerHTML				= data.packet.replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r');
+			}
 		} else {
 			paket.innerHTML 			= `<strong>${data.definition.Name}</strong>`;
 
@@ -57,12 +64,12 @@
 			window.api.openLog(data.packet);
 		});
 
-		this.Logs.append(entry);
+		(data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).append(entry);
 
 		/* Scrolling */
 		if(scrolling) {
 			requestAnimationFrame(() => {
-				this.Logs.scrollTop = this.Logs.scrollHeight;
+				(data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).scrollTop = (data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
 			});
 		}
 	}
