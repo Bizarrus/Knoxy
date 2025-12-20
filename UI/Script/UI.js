@@ -6,8 +6,8 @@
 	Count	= 0;
 
 	constructor() {
-		this.ChatLogs	= document.querySelector('section[data-name="chatLogs"] ui-logs ui-data');
-		this.CardLogs	= document.querySelector('section[data-name="cardLogs"] ui-logs ui-data');
+		this.ChatLogs	= document.querySelector('section[data-name="chatLogs"] ui-list ui-data');
+		this.CardLogs	= document.querySelector('section[data-name="cardLogs"] ui-list ui-data');
 		this.Config		= document.querySelector('[data-name="persistence"] ui-list#config ui-data');
 		this.Users		= document.querySelector('[data-name="persistence"] ui-list#users ui-data');
 
@@ -29,9 +29,9 @@
 
 	onLog(data) {
 		console.log('Packet', data);
-		document.querySelector(`section[data-name="${data.serverTyp.toLowerCase()}Logs"] ui-logs ui-header div:last-child`).innerText = `${++this.Count} Packets`;
+		document.querySelector(`section[data-name="${data.serverTyp.toLowerCase()}Logs"] ui-list ui-header div:last-child`).innerText = `${++this.Count} Packets`;
 
-		const scrolling		= this.ChatLogs.scrollTop + (data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).clientHeight + 20 >= (data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
+		const scrolling		= this.ChatLogs.scrollTop + (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).clientHeight + 20 >= (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
 		const entry	= document.createElement('ui-entry');
 
 		if(data.typ.toUpperCase() === 'SERVER') {
@@ -74,12 +74,12 @@
 			window.api.openLog(data.packet);
 		});
 
-		(data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).append(entry);
+		(data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).append(entry);
 
 		/* Scrolling */
 		if(scrolling) {
 			requestAnimationFrame(() => {
-				(data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).scrollTop = (data.serverTyp == 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
+				(data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollTop = (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
 			});
 		}
 	}
