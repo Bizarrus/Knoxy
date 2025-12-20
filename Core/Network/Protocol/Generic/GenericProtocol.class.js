@@ -34,7 +34,9 @@ export default class GenericProtocol {
 	static parseTree(tree = null) {
 		const base = new GenericProtocol(0);
 
-		base.updateTree(tree);
+		if(tree != null) {
+			base.updateTree(tree);
+		}
 
 		return base;
 	}
