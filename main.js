@@ -2,6 +2,7 @@
  * @author  Bizarrus, SeBiTM
  **/
 import Proxy from './Core/Network/Proxy.class.js';
+import GenericTree from './Core/Network/Tree.class.js';
 import Plugins from './Core/Plugins.class.js';
 import LogWindow from './Core/Window/Log.class.js';
 import MainWindow from './Core/Window/Main.class.js';
@@ -12,6 +13,7 @@ import Chalk from 'chalk';
 import util from 'node:util';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import FileSystem from 'node:fs';
+import Tree from './Core/Network/Tree.class.js';
 
 class Main {
 	Configuration = {
@@ -39,6 +41,8 @@ class Main {
 		this.Plugins		= new Plugins();
 		this.ChatProxy		= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
 		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
+		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt');
+		this.CardTree		= new GenericTree('./Data/GenericCardTree.txt');
 		this.Persistence	= new Persistence();
 		this.MainWindow		= new MainWindow();
 		this.LogWindow		= new LogWindow();
@@ -46,9 +50,6 @@ class Main {
 		/* Loading StApp Persistence */
 		// @ToDo vielleicht move des Clienten im Sub-Directory mit anderem cwd()? Würde das Haupt-Verzeichnis nicht so zumüllen!
 		this.Persistence.load('./persistence2.data');
-
-		this.lastestUpdatedChatTree = null;
-		this.lastestUpdatedCardTree = null;
 
 		app.whenReady().then(() => {
 			this.MainWindow.init().then(() => {
@@ -76,49 +77,13 @@ class Main {
 		});
 
 		let color_swap	= true;
-		let chat_tree		= null;
-		let card_tree		= null;
-
-		// @ToDo Auslagern? Die Dateien existieren bisher nicht
-		if(FileSystem.existsSync('./Data/GenericChatTree.txt')) {
-			chat_tree = FileSystem.readFileSync('./Data/GenericChatTree.txt').toString('utf8');
-		}
-
-		if(FileSystem.existsSync('./Data/GenericCardTree.txt')) {
-			card_tree = FileSystem.readFileSync('./Data/GenericCardTree.txt').toString('utf8');
-		}
-
-		const genericChatTree = GenericProtocol.parseTree(chat_tree);
-		const genericCardTree = GenericProtocol.parseTree(card_tree);
-
-		const handleTreeUpdate = (tree, generic, isCard) => {
-			if (generic.getName() === 'CONFIRM_PROTOCOL_HASH') {
-				if (isCard) {
-					if (this.lastestUpdatedCardTree) { // reuse latest stored GenericTree (after reconnect)
-						tree.updateTree(this.lastestUpdatedCardTree);
-					}
-				} else {
-					if (this.lastestUpdatedChatTree) { // reuse latest stored GenericTree (after reconnect)
-						tree.updateTree(this.lastestUpdatedChatTree);
-					}
-				}
-			} else if(generic.getName() === 'CHANGE_PROTOCOL') {
-				if (isCard) {
-					this.lastestUpdatedCardTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
-					tree.updateTree(this.lastestUpdatedCardTree);
-				} else {
-					this.lastestUpdatedChatTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
-					tree.updateTree(this.lastestUpdatedChatTree);
-				}
-				console.info('Protocol changed', tree.hash);
-			}
-		};
 
 		// CardProxy test
 		this.CardProxy.on('packet', (session, typ, buffer) => {
-			let generic = genericCardTree.read(buffer);
+			let genericCardTree	= this.CardTree.get();
+			let generic			= genericCardTree.read(buffer);
 
-			handleTreeUpdate(genericCardTree, generic);
+			this.CardTree.handleUpdate(genericCardTree, generic);
 
 			this.MainWindow.send('log', {
 				serverTyp:	'CARD',
@@ -160,29 +125,31 @@ class Main {
 			// CLI-Mode
 			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
 
-			let generic = null;
+			let generic	= null;
+			let genericChatTree = this.ChatTree.get();
 
 			try {
 				if(opcode === ':' || opcode === 'q') {
-					generic = genericChatTree.read(packet, 2);
+					if(genericChatTree !== null) {
+						generic = genericChatTree.read(packet, 2);
 
-					console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), {
-						colors: true,
-						depth: null,
-						compact: false
-					})));
+						console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), {
+							colors: true,
+							depth: null,
+							compact: false
+						})));
 
-					handleTreeUpdate(genericChatTree, generic);
+						this.ChatTree.handleUpdate(genericChatTree, generic);
 
-					const p = opcode + '\0' + genericChatTree.write(generic);
+						const p = opcode + '\0' + genericChatTree.write(generic);
 
-					if(p !== packet) {
-						console.log('FAIL   ', generic.getName());
-						console.log('       ', Buffer.from(packet).toString('hex'));
-						console.log('       ', Buffer.from(p).toString('hex'));
+						if(p !== packet) {
+							console.log('FAIL   ', generic.getName());
+							console.log('       ', Buffer.from(packet).toString('hex'));
+							console.log('       ', Buffer.from(p).toString('hex'));
+						}
 					}
 				}
-
 			// catch exceptions, otherwise, the packet will be sent to the server.
 			} catch(error) {
 				console.error(error);
