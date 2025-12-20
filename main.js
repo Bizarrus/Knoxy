@@ -3,20 +3,15 @@
  **/
 import Proxy from './Core/Network/Proxy.class.js';
 import Plugins from './Core/Plugins.class.js';
+import LogWindow from './Core/Window/Log.class.js';
 import MainWindow from './Core/Window/Main.class.js';
 import Persistence from './Core/Utils/Deserializer/Persistence.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import Chalk from 'chalk';
-import fs from 'node:fs';
 import util from 'node:util';
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 import FileSystem from 'node:fs';
-
-const __filename	= fileURLToPath(import.meta.url);
-const __dirname	= dirname(__filename);
 
 class Main {
 	Configuration = {
@@ -54,29 +49,16 @@ class Main {
 		this.lastestUpdatedCardTree = null;
 
 		app.whenReady().then(() => {
-			this.MainWindow.init();
+			this.MainWindow.init().then(() => {
+				this.MainWindow.send('persistence:config', this.Persistence.getConfig());
+				this.MainWindow.send('persistence:users', this.Persistence.getUsers());
+			})
 
 			ipcMain.on('open-log', (e, data) => {
-				console.log('OPEN', data);
-
-				const logWin = new BrowserWindow({
-					width:	600,
-					height: 800,
-					webPreferences: {
-						preload: join(__dirname, "UI", "preload.js")
-					}
+				this.LogWindow.init();
+				this.LogWindow.on('loaded', (instance) => {
+					instance.send('log', data);
 				});
-
-				logWin.loadFile(join(__dirname, 'UI', 'log.html'));
-
-				logWin.webContents.once('did-finish-load', () => {
-					logWin.webContents.send('log', data);
-				});
-			});
-
-			this.MainWindow.on('loaded', (instance) => {
-				instance.send('persistence:config', this.Persistence.getConfig());
-				instance.send('persistence:users', this.Persistence.getUsers());
 			});
 		});
 
@@ -93,16 +75,15 @@ class Main {
 		});
 
 		let color_swap			= true;
-
 		let chat_tree = null;
 		let card_tree = null;
 
-		if(fs.existsSync('./Data/GenericChatTree.txt')) {
-			chat_tree = fs.readFileSync('./Data/GenericChatTree.txt').toString('utf8');
+		if(FileSystem.existsSync('./Data/GenericChatTree.txt')) {
+			chat_tree = FileSystem.readFileSync('./Data/GenericChatTree.txt').toString('utf8');
 		}
 
-		if(fs.existsSync('./Data/GenericCardTree.txt')) {
-			card_tree = fs.readFileSync('./Data/GenericCardTree.txt').toString('utf8');
+		if(FileSystem.existsSync('./Data/GenericCardTree.txt')) {
+			card_tree = FileSystem.readFileSync('./Data/GenericCardTree.txt').toString('utf8');
 		}
 
 		const genericChatTree = GenericProtocol.parseTree(chat_tree);
@@ -233,8 +214,5 @@ class Main {
 		}, 500);
 	}
 }
-
-
-
 
 new Main();

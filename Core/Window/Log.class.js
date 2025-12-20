@@ -2,7 +2,7 @@ import { BrowserWindow } from 'electron';
 import Path from 'node:path';
 import Process from 'node:process';
 
-export default class MainWindow {
+export default class LogWindow {
 	Window = null;
 
 	init() {
@@ -16,7 +16,7 @@ export default class MainWindow {
 			}
 		});
 
-		return this.Window.loadFile(Path.join(Process.cwd(), 'UI', 'main.html'));
+		return this.Window.loadFile(Path.join(Process.cwd(), 'UI', 'log.html'));
 	}
 
 	send(key, data) {
@@ -27,7 +27,7 @@ export default class MainWindow {
 		switch(key) {
 			case 'loaded':
 				this.Window.webContents.once('did-finish-load', () => callback(this));
-			break;
+				break;
 		}
 	}
 }
