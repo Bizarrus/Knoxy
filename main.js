@@ -43,6 +43,7 @@ class Main {
 		this.MainWindow		= new MainWindow();
 
 		/* Loading StApp Persistence */
+		// @ToDo vielleicht move des Clienten im Sub-Directory mit anderem cwd()? Würde das Haupt-Verzeichnis nicht so zumüllen!
 		this.Persistence.load('./persistence2.data');
 
 		this.lastestUpdatedChatTree = null;
@@ -55,9 +56,8 @@ class Main {
 			})
 
 			ipcMain.on('open-log', (e, data) => {
-				this.LogWindow.init();
-				this.LogWindow.on('loaded', (instance) => {
-					instance.send('log', data);
+				this.LogWindow.init().then(() => {
+					this.LogWindow.send('log', data);
 				});
 			});
 		});
@@ -78,6 +78,7 @@ class Main {
 		let chat_tree = null;
 		let card_tree = null;
 
+		// @ToDo Auslagern?
 		if(FileSystem.existsSync('./Data/GenericChatTree.txt')) {
 			chat_tree = FileSystem.readFileSync('./Data/GenericChatTree.txt').toString('utf8');
 		}

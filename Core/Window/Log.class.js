@@ -22,12 +22,4 @@ export default class LogWindow {
 	send(key, data) {
 		this.Window.webContents.send(key, data);
 	}
-
-	on(key, callback) {
-		switch(key) {
-			case 'loaded':
-				this.Window.webContents.once('did-finish-load', () => callback(this));
-				break;
-		}
-	}
 }
