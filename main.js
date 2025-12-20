@@ -3,6 +3,7 @@
  **/
 import Proxy from './Core/Network/Proxy.class.js';
 import Plugins from './Core/Plugins.class.js';
+import MainWindow from './Core/Window/Main.class.js';
 import Persistence from './Core/Utils/Deserializer/Persistence.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
@@ -12,6 +13,7 @@ import util from 'node:util';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import FileSystem from 'node:fs';
 
 const __filename	= fileURLToPath(import.meta.url);
 const __dirname	= dirname(__filename);
@@ -35,33 +37,24 @@ class Main {
 				Hostname:	'chat.knuddels.de',
 				Port:		2810
 			}
-		},
+		}
 	};
 
 	constructor() {
 		this.Plugins		= new Plugins();
-		this.ChatProxy	= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
-		this.CardProxy	= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
+		this.ChatProxy		= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
+		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
 		this.Persistence	= new Persistence();
+		this.MainWindow		= new MainWindow();
 
 		/* Loading StApp Persistence */
 		this.Persistence.load('./persistence2.data');
 
 		this.lastestUpdatedChatTree = null;
 		this.lastestUpdatedCardTree = null;
-		
-		let win;
 
 		app.whenReady().then(() => {
-			win = new BrowserWindow({
-				width:	800,
-				height: 600,
-				webPreferences: {
-					preload:			join(__dirname, 'UI', 'preload.js'),
-					contextIsolation:	true,
-					nodeIntegration:	false
-				}
-			});
+			this.MainWindow.init();
 
 			ipcMain.on('open-log', (e, data) => {
 				console.log('OPEN', data);
@@ -81,11 +74,9 @@ class Main {
 				});
 			});
 
-			win.loadFile(join(__dirname, 'UI', 'main.html'));
-
-			win.webContents.once('did-finish-load', () => {
-				win.webContents.send('persistence:config', this.Persistence.getConfig());
-				win.webContents.send('persistence:users', this.Persistence.getUsers());
+			this.MainWindow.on('loaded', (instance) => {
+				instance.send('persistence:config', this.Persistence.getConfig());
+				instance.send('persistence:users', this.Persistence.getUsers());
 			});
 		});
 
@@ -102,8 +93,20 @@ class Main {
 		});
 
 		let color_swap			= true;
-		const genericChatTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericChatTree.txt').toString('utf8'));
-		const genericCardTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericCardTree.txt').toString('utf8'));
+
+		let chat_tree = null;
+		let card_tree = null;
+
+		if(fs.existsSync('./Data/GenericChatTree.txt')) {
+			chat_tree = fs.readFileSync('./Data/GenericChatTree.txt').toString('utf8');
+		}
+
+		if(fs.existsSync('./Data/GenericCardTree.txt')) {
+			card_tree = fs.readFileSync('./Data/GenericCardTree.txt').toString('utf8');
+		}
+
+		const genericChatTree = GenericProtocol.parseTree(chat_tree);
+		const genericCardTree = GenericProtocol.parseTree(card_tree);
 
 		const handleTreeUpdate = (tree, generic, isCard) => {
 			if (generic.getName() === 'CONFIRM_PROTOCOL_HASH') {
@@ -134,20 +137,20 @@ class Main {
 
 			handleTreeUpdate(genericCardTree, generic);
 
-			if(win) {
-				win.webContents.send('log', {
-					serverTyp:	'CARD',
-					session:	session,
-					typ:		typ,
-					packet:		buffer,
-					hex:		buffer.toString('hex'),
-					generic:	generic ? generic.toJSON() : undefined
-				});
-			}
+			this.MainWindow.send('log', {
+				serverTyp:	'CARD',
+				session:	session,
+				typ:		typ,
+				packet:		buffer,
+				hex:		buffer.toString('hex'),
+				generic:	generic ? generic.toJSON() : undefined
+			});
+
 			console.log(typ, buffer);
 			console.log(generic.toJSON());
 			return buffer;
 		});
+
 		this.CardProxy.on('exception', (type, session, error) => {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
@@ -193,17 +196,15 @@ class Main {
 			}
 
 			// Send Definition to UI
-			if(win) {
-				win.webContents.send('log', {
-					serverTyp:	'CHAT',
-					session:	session,
-					typ:		typ,
-					packet:		packet,
-					hex:		Buffer.from(packet).toString('hex'),
-					definition:	definition,
-					generic:	generic ? generic.toJSON() : undefined
-				});
-			}
+			this.MainWindow.send('log', {
+				serverTyp:	'CHAT',
+				session:	session,
+				typ:		typ,
+				packet:		packet,
+				hex:		Buffer.from(packet).toString('hex'),
+				definition:	definition,
+				generic:	generic ? generic.toJSON() : undefined
+			});
 
 			return packet;
 		});
