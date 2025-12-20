@@ -4,6 +4,7 @@
 import Network from 'node:net';
 import Crypto from 'node:crypto';
 import * as Events from 'node:events';
+import Request from './HTTP/Request.class.js';
 import Packet from './Protocol/Packet.class.js';
 import Huffman from './Protocol/Compressor/Huffman.class.js';
 import ChunkedInputStream from './Protocol/ChunkedInputStream.class.js';
@@ -89,7 +90,7 @@ export default class Proxy extends Events.EventEmitter {
 			/* Incoming Data */
 			Client.on('data', (data) => {
 				// HTTP/S direkt durch
-				if(this.isHTTPRequest(data)) {
+				if(this.isHTTPRequest(Client, data)) {
 					onlyTunnel = true;
 					return;
 				}
@@ -161,7 +162,7 @@ export default class Proxy extends Events.EventEmitter {
 
 			Server.on('data', (data) => {
 				// HTTP/S direkt durch
-				if(this.isHTTPRequest(data)) {
+				if(this.isHTTPRequest(Client, data)) {
 					onlyTunnel = true;
 					return;
 				}
@@ -258,12 +259,23 @@ export default class Proxy extends Events.EventEmitter {
 		return undefined;
 	}
 
-	isHTTPRequest(data, onlyTunnel) {
+	isHTTPRequest(Client, data, onlyTunnel) {
+		// @ToDo wo kommen die Reuqests her, hier werden nur responses behandelt
 		let http 	= data.toString('utf8').startsWith(Buffer.from('HTTP/'));
 		let secured	= (data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04);
 
 		if(onlyTunnel || http || secured) {
-			this.emit(secured ? 'HTTPS' : 'HTTP', 'Server', ID, data);
+			this.emit(secured ? 'HTTPS' : 'HTTP', 'Server', new Request(data));
+
+			if (this.Plugins) {
+				data = this.Plugins.onRequest(data);
+			}
+
+			// Plugin has filtered the packet, so we don't send it!
+			if(data === null) {
+				return true;
+			}
+
 			Client.write(data);
 			return true;
 		}

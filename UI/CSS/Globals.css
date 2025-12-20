@@ -92,6 +92,7 @@ input[type="radio"] {
 #chatLogs:checked ~ section[data-name="logs"] nav label[for="chatLogs"],
 #cardLogs:checked ~ section[data-name="logs"] nav label[for="cardLogs"],
 #tree:checked ~ nav label[for="tree"],
+#requests:checked ~ nav label[for="requests"],
 #plugins:checked ~ nav label[for="plugins"],
 #persistence:checked ~ nav label[for="persistence"] {
     background: #FFFFFF;
@@ -121,6 +122,7 @@ section h2 {
 #chatLogs:checked ~ section[data-name="logs"] section[data-name="chatLogs"],
 #cardLogs:checked ~ section[data-name="logs"] section[data-name="cardLogs"],
 #tree:checked ~ section[data-name="tree"],
+#requests:checked ~ section[data-name="requests"],
 #plugins:checked ~ section[data-name="plugins"],
 #persistence:checked ~ section[data-name="persistence"] {
     display: flex;

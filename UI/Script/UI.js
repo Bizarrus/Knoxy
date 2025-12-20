@@ -1,17 +1,21 @@
 (new class UI {
-	ChatLogs 	= null;
-	CardLogs 	= null;
-	Config 	= null;
-	Users 		= null;
-	Count	= 0;
+	ChatLogs 		= null;
+	CardLogs 		= null;
+	Requests 		= null;
+	Config 		= null;
+	Users 			= null;
+	Count		= 0;
+	CountRequests= 0;
 
 	constructor() {
 		this.ChatLogs	= document.querySelector('section[data-name="chatLogs"] ui-list ui-data');
 		this.CardLogs	= document.querySelector('section[data-name="cardLogs"] ui-list ui-data');
+		this.Requests	= document.querySelector('section[data-name="requests"] ui-list ui-data');
 		this.Config		= document.querySelector('[data-name="persistence"] ui-list#config ui-data');
 		this.Users		= document.querySelector('[data-name="persistence"] ui-list#users ui-data');
 
 		window.api.onLog((data) => this.onLog(data));
+		window.api.onWebRequest((request) => this.onWebRequest(request));
 		window.api.onPersistenceConfig((data) => this.onPersistenceConfig(data));
 		window.api.onPersistenceUsers((data) => this.onPersistenceUsers(data));
 	}
@@ -41,34 +45,28 @@
 		}
 
 		/* Time */
-		const timestamp	= document.createElement('div');
-		timestamp.innerHTML				= this.getTimestamp();
-		entry.append(timestamp);
+		this.addEntry(entry, this.getTimestamp());
 
 		/* Session */
-		const session 	= document.createElement('div');
-		session.innerHTML 				= `<small>${data.session}</small>`;
-		entry.append(session);
+		this.addEntry(entry, `<small>${data.session}</small>`);
 
 		/* Data */
-		const paket		= document.createElement('div');
-
 		if(!data.definition) {
 			if(data.serverTyp === 'CARD') {
 				console.error('###');
-				paket.innerHTML				+= `${data.generic.Name}`; // todo
+
+
+				this.addEntry(entry, `${data.generic.Name}`); // todo
 			} else {
-				paket.innerHTML				= data.packet.replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r');
+				this.addEntry(entry, data.packet.replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r'));
 			}
 		} else {
-			paket.innerHTML 			= `<strong>${data.definition.Name}</strong>`;
-
 			if(data.generic) {
-				paket.innerHTML			+= `: ${data.generic.Name}`;
+				this.addEntry(entry, `<strong>${data.definition.Name}</strong>: ${data.generic.Name}`);
+			} else {
+				this.addEntry(entry, `<strong>${data.definition.Name}</strong>`);
 			}
 		}
-
-		entry.append(paket);
 
 		entry.addEventListener('dblclick', () => {
 			window.api.openLog(data.packet);
@@ -84,6 +82,18 @@
 		}
 	}
 
+	onWebRequest(request) {
+		console.log('Request', request);
+		document.querySelector(`section[data-name="requests"] ui-list ui-header div:last-child`).innerText = `${++this.CountRequests} Requests`;
+
+		const entry	= document.createElement('ui-entry');
+
+		/* Timestamp */
+		this.addEntry(entry, request.Headers);
+
+		this.Requests.append(entry);
+	}
+
 	onPersistenceConfig(config) {
 		console.log('Config', config);
 
@@ -91,14 +101,10 @@
 			const entry	= document.createElement('ui-entry');
 
 			/* Name */
-			const name	= document.createElement('div');
-			name.innerHTML				= key;
-			entry.append(name);
+			this.addEntry(entry, key);
 
 			/* Value */
-			const value	= document.createElement('div');
-			value.innerHTML				= val;
-			entry.append(value);
+			this.addEntry(entry, val);
 
 			this.Config.append(entry);
 		}
@@ -111,26 +117,24 @@
 			const entry	= document.createElement('ui-entry');
 
 			/* Nickname */
-			const name	= document.createElement('div');
-			name.innerHTML				= user.userContext.nick;
-			entry.append(name);
+			this.addEntry(entry, user.userContext.nick);
 
 			/* Token */
-			const token	= document.createElement('div');
-			token.innerHTML				= user.userContext.deviceToken || '<i>No Token</i>';
-			entry.append(token);
+			this.addEntry(entry, user.userContext.deviceToken || '<i>No Token</i>');
 
 			/* Password */
-			const password	= document.createElement('div');
-			password.innerHTML				= user.userContext.password || '<i>No Password</i>';
-			entry.append(password);
+			this.addEntry(entry, user.userContext.password || '<i>No Password</i>');
 
 			/* Last Login */
-			const lastLogin	= document.createElement('div');
-			lastLogin.innerHTML				= this.getTimestamp(user.userContext.lastLogin);
-			entry.append(lastLogin);
+			this.addEntry(entry, this.getTimestamp(user.userContext.lastLogin));
 
 			this.Users.append(entry);
 		}
+	}
+
+	addEntry(container, content) {
+		const element	= document.createElement('div');
+		element.innerHTML				= content;
+		container.append(element);
 	}
 }());

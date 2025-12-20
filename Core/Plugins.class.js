@@ -47,10 +47,6 @@ export default class Plugins {
 
 					this.Plugins.set(name, instance);
 
-					if(typeof(instance.onInit) === 'function') {
-						instance.onInit();
-					}
-
 					console.warn('[Plugins]', 'Initialized', name);
 				} catch(error) {
 					console.error('[Plugins]', 'Error loading', name, error);
@@ -66,14 +62,32 @@ export default class Plugins {
 
 	onPacket(packet) {
 		for(const [name, plugin] of this.Plugins) {
-			console.log("[Plugins] Handling Packet with Plugin:" + name + " (" + plugin.constructor.name + ")");
-
-			if(typeof(plugin.onPacket) === 'function') {
+			if(plugin.isEnabled() && typeof(plugin.onPacket) === 'function') {
 				// ToDo adding definition for better handling of packets?
 				packet = plugin.onPacket(packet);
 			}
 		}
 
 		return packet;
+	}
+
+	onGeneric(packet) {
+		for(const [name, plugin] of this.Plugins) {
+			if(plugin.isEnabled() && typeof(plugin.onGeneric) === 'function') {
+				packet = plugin.onGeneric(packet);
+			}
+		}
+
+		return packet;
+	}
+
+	onRequest(data) {
+		for(const [name, plugin] of this.Plugins) {
+			if(plugin.isEnabled() && typeof(plugin.onRequest) === 'function') {
+				data = plugin.onRequest(data);
+			}
+		}
+
+		return data;
 	}
 }

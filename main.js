@@ -170,11 +170,22 @@ class Main {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
 
-		this.ChatProxy.on('HTTP', (session, typ, data) => {
-			//console.error('[HTTP] Request', session, typ, data.toString('utf8'));
+		this.ChatProxy.on('HTTP', (type, request) => {
+			console.error('[HTTP] Request', request);
+			this.MainWindow.send('web:request', {
+				type:		type,
+				secured:	false,
+				request:	request
+			});
 		});
-		this.ChatProxy.on('HTTPS', (session, typ, data) => {
-			//console.error('[HTTPS] Request', session, typ, data);
+
+		this.ChatProxy.on('HTTPS', (type, request) => {
+			//console.error('[HTTPS] Request', request);
+			this.MainWindow.send('web:request', {
+				type:		type,
+				secured:	true,
+				request:	request
+			});
 		});
 
 		this.ChatProxy.on('disconnect', (session, type) => {

@@ -9,16 +9,18 @@
 	</head>
 	<body>
 		<main>
-			<input type="radio" name="tabs" id="logs">
-			<input type="radio" name="innerTabs" id="chatLogs" checked>
-			<input type="radio" name="innerTabs" id="cardLogs">
-			<input type="radio" name="tabs" id="tree">
-			<input type="radio" name="tabs" id="plugins">
-			<input type="radio" name="tabs" id="persistence">
+			<input type="radio" name="tabs" id="logs" checked />
+			<input type="radio" name="innerTabs" id="chatLogs" checked />
+			<input type="radio" name="innerTabs" id="cardLogs" />
+			<input type="radio" name="tabs" id="tree" />
+			<input type="radio" name="tabs" id="requests" />
+			<input type="radio" name="tabs" id="plugins" />
+			<input type="radio" name="tabs" id="persistence" />
 
 			<nav>
 				<label for="logs">Logs</label>
 				<!--<label for="tree">Generic Tree</label>-->
+				<label for="requests">Requests</label>
 				<!--<label for="plugins">Plugins</label>-->
 				<label for="persistence">Persistence</label>
 			</nav>
@@ -55,6 +57,18 @@
 			</section>
 			<section data-name="tree">
 				tree
+			</section>
+			<section data-name="requests">
+				<ui-list>
+					<ui-header>
+						<div>Timestamp</div>
+						<div>Type</div>
+						<div>URL</div>
+						<div>Data</div>
+						<div>0 Requests</div>
+					</ui-header>
+					<ui-data></ui-data>
+				</ui-list>
 			</section>
 			<section data-name="plugins">
 				plugins
