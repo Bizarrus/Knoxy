@@ -8,12 +8,9 @@ import LogWindow from './Core/Window/Log.class.js';
 import MainWindow from './Core/Window/Main.class.js';
 import Persistence from './Core/Utils/Deserializer/Persistence.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
-import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import Chalk from 'chalk';
 import util from 'node:util';
-import { app, BrowserWindow, ipcMain } from 'electron';
-import FileSystem from 'node:fs';
-import Tree from './Core/Network/Tree.class.js';
+import { app, ipcMain } from 'electron';
 
 class Main {
 	Configuration = {
