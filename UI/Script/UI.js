@@ -14,10 +14,24 @@
 		this.Config		= document.querySelector('[data-name="persistence"] ui-list#config ui-data');
 		this.Users		= document.querySelector('[data-name="persistence"] ui-list#users ui-data');
 
-		window.api.onLog((data) => this.onLog(data));
-		window.api.onWebRequest((request) => this.onWebRequest(request));
-		window.api.onPersistenceConfig((data) => this.onPersistenceConfig(data));
-		window.api.onPersistenceUsers((data) => this.onPersistenceUsers(data));
+		[
+			'onLog',
+			'onWebRequest',
+			'onPersistenceConfig',
+			'onPersistenceUsers'
+		].forEach((name) => {
+			if(typeof(window.api[name]) === 'function') {
+				window.api[name]((data) => {
+					try {
+						if(typeof(this[name]) === 'function') {
+							this[name](data);
+						}
+					} catch(error) {
+						console.error(error);
+					}
+				});
+			}
+		});
 	}
 
 	getTimestamp(timestamp) {
@@ -33,10 +47,12 @@
 
 	onLog(data) {
 		console.log('Packet', data);
-		document.querySelector(`section[data-name="${data.serverTyp.toLowerCase()}Logs"] ui-list ui-header div:last-child`).innerText = `${++this.Count} Packets`;
+		document.querySelector(`section[data-name="${data.serverTyp.toLowerCase()}Logs"] ui-list ui-header aside`).innerText = `${++this.Count} Packets`;
 
 		const scrolling		= this.ChatLogs.scrollTop + (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).clientHeight + 20 >= (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
 		const entry	= document.createElement('ui-entry');
+
+		this.setGrid((data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs), entry);
 
 		if(data.typ.toUpperCase() === 'SERVER') {
 			entry.dataset.type				= 'INPUT';
@@ -84,9 +100,10 @@
 
 	onWebRequest(request) {
 		console.log('Request', request);
-		document.querySelector(`section[data-name="requests"] ui-list ui-header div:last-child`).innerText = `${++this.CountRequests} Requests`;
+		document.querySelector(`section[data-name="requests"] ui-list ui-header aside`).innerText = `${++this.CountRequests} Requests`;
 
-		const entry	= document.createElement('ui-entry');
+		const entry		= document.createElement('ui-entry');
+		this.setGrid(this.Requests, entry);
 
 		/* Timestamp */
 		this.addEntry(entry, request.Headers);
@@ -99,6 +116,7 @@
 
 		for(const [key, val] of Object.entries(config)) {
 			const entry	= document.createElement('ui-entry');
+			this.setGrid(this.Config, entry);
 
 			/* Name */
 			this.addEntry(entry, key);
@@ -115,6 +133,8 @@
 
 		for(const [key, user] of Object.entries(users)) {
 			const entry	= document.createElement('ui-entry');
+
+			this.setGrid(this.Users, entry);
 
 			/* Nickname */
 			this.addEntry(entry, user.userContext.nick);
@@ -136,5 +156,9 @@
 		const element	= document.createElement('div');
 		element.innerHTML				= content;
 		container.append(element);
+	}
+
+	setGrid(container, element) {
+		element.style.gridTemplateColumns	= container.parentNode.querySelector('ui-header').style.gridTemplateColumns;
 	}
 }());

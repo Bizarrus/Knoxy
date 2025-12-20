@@ -144,7 +144,6 @@ ui-list ui-header {
     position: sticky;
     top: 0;
     z-index: 10;
-    grid-template-columns: 155px 210px 1fr 1fr;
     padding: 0.25rem 0;
     cursor: default;
     border-bottom: 1px solid #ccc;
@@ -157,7 +156,7 @@ ui-list ui-header > div {
     padding-left: 7px;
 }
 
-ui-list ui-header div:last-child {
+ui-list ui-header aside {
     text-align: right;
     font-weight: normal;
     padding-right: 7px;
@@ -177,7 +176,6 @@ ui-list ui-data ui-entry {
     display: grid;
     font-size: 0.8rem;
     cursor: pointer !important;
-    grid-template-columns: 155px 210px 1fr;
 }
 
 ui-list ui-data ui-entry * {
