@@ -19,6 +19,10 @@ export default class MainWindow {
 		return this.Window.loadFile(Path.join(Process.cwd(), 'UI', 'main.html'));
 	}
 
+	getWindow() {
+		return this.Window;
+	}
+
 	send(key, data) {
 		this.Window.webContents.send(key, data);
 	}

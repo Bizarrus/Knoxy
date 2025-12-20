@@ -41,6 +41,7 @@ class Main {
 		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
 		this.Persistence	= new Persistence();
 		this.MainWindow		= new MainWindow();
+		this.LogWindow		= new LogWindow();
 
 		/* Loading StApp Persistence */
 		// @ToDo vielleicht move des Clienten im Sub-Directory mit anderem cwd()? Würde das Haupt-Verzeichnis nicht so zumüllen!
@@ -55,8 +56,8 @@ class Main {
 				this.MainWindow.send('persistence:users', this.Persistence.getUsers());
 			})
 
-			ipcMain.on('open-log', (e, data) => {
-				this.LogWindow.init().then(() => {
+			ipcMain.on('open-log', (event, data) => {
+				this.LogWindow.init(this.MainWindow).then(() => {
 					this.LogWindow.send('log', data);
 				});
 			});
@@ -74,11 +75,11 @@ class Main {
 			console.log(session, '[Type]', typ);
 		});
 
-		let color_swap			= true;
-		let chat_tree = null;
-		let card_tree = null;
+		let color_swap	= true;
+		let chat_tree		= null;
+		let card_tree		= null;
 
-		// @ToDo Auslagern?
+		// @ToDo Auslagern? Die Dateien existieren bisher nicht
 		if(FileSystem.existsSync('./Data/GenericChatTree.txt')) {
 			chat_tree = FileSystem.readFileSync('./Data/GenericChatTree.txt').toString('utf8');
 		}
@@ -161,20 +162,30 @@ class Main {
 
 			let generic = null;
 
-			if(opcode === ':' || opcode === 'q') {
-				generic = genericChatTree.read(packet, 2);
+			try {
+				if(opcode === ':' || opcode === 'q') {
+					generic = genericChatTree.read(packet, 2);
 
-				console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), { colors: true, depth: null, compact: false })));
+					console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), {
+						colors: true,
+						depth: null,
+						compact: false
+					})));
 
-				handleTreeUpdate(genericChatTree, generic);
-				
-				const p = opcode + '\0' + genericChatTree.write(generic);
+					handleTreeUpdate(genericChatTree, generic);
 
-				if(p !== packet) {
-					console.log('FAIL   ', generic.getName());
-					console.log('       ', Buffer.from(packet).toString('hex'));
-					console.log('       ', Buffer.from(p).toString('hex'));
+					const p = opcode + '\0' + genericChatTree.write(generic);
+
+					if(p !== packet) {
+						console.log('FAIL   ', generic.getName());
+						console.log('       ', Buffer.from(packet).toString('hex'));
+						console.log('       ', Buffer.from(p).toString('hex'));
+					}
 				}
+
+			// catch exceptions, otherwise, the packet will be sent to the server.
+			} catch(error) {
+				console.error(error);
 			}
 
 			// Send Definition to UI
