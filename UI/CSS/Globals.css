@@ -26,6 +26,24 @@ body {
     flex-direction: column;
 }
 
+/* Buttons */
+button {
+    border: none;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer !important;
+    background: rgba(255, 255, 255, 0.65);
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+button[data-active="true"] {
+    color: #FFFFFF;
+    background: rgba(0, 0, 90, 0.4);
+}
+
 /* Header */
 header {
     background: #2C3E50;
@@ -82,6 +100,12 @@ nav label {
 
 nav label:hover {
     background: #1a252f;
+}
+
+nav aside {
+    flex: 1 0 auto;
+    text-align: end;
+    align-content: center;
 }
 
 input[type="radio"] {
@@ -172,10 +196,15 @@ ui-list ui-data {
 
 ui-list ui-data ui-entry {
     padding: 0.25rem 0;
+    position: relative;
     border-bottom: 1px solid #ccc;
     display: grid;
     font-size: 0.8rem;
     cursor: pointer !important;
+}
+
+ui-list ui-data ui-entry[data-show="false"] {
+    display: none;
 }
 
 ui-list ui-data ui-entry * {
@@ -201,6 +230,30 @@ ui-list ui-data ui-entry > div {
 ui-list ui-data ui-entry > div small {
     color: #B6B7AB;
 }
+
+ui-list ui-data ui-entry::before {
+    content: "";
+    display: inline-block;
+    font-family: bootstrap-icons;
+    position: absolute;
+    top: 5px;
+    left: 6px;
+}
+
+ui-list ui-data ui-entry[data-filter] {
+    padding-left: 18px;
+}
+
+ui-list ui-data ui-entry[data-filter="chat"]::before {
+    content: "\f267";
+    color: #419DFF;
+}
+
+ui-list ui-data ui-entry[data-filter="card"]::before {
+    content: "\f5a0";
+    color: #17B94A;
+}
+
 
 ui-list ui-data ui-entry div:first-child::before {
     content: "";

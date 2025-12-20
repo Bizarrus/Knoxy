@@ -1,15 +1,16 @@
 (new class UI {
-	ChatLogs 		= null;
-	CardLogs 		= null;
+	Logs 			= null;
+	Filter 		= [ 'chat', 'card' ];
 	Requests 		= null;
 	Config 		= null;
 	Users 			= null;
-	Count		= 0;
-	CountRequests= 0;
+	Count		=  {
+		Packets:	0,
+		Requests:	0
+	};
 
 	constructor() {
-		this.ChatLogs	= document.querySelector('section[data-name="chatLogs"] ui-list ui-data');
-		this.CardLogs	= document.querySelector('section[data-name="cardLogs"] ui-list ui-data');
+		this.Logs		= document.querySelector('section[data-name="logs"] ui-list ui-data');
 		this.Requests	= document.querySelector('section[data-name="requests"] ui-list ui-data');
 		this.Config		= document.querySelector('[data-name="persistence"] ui-list#config ui-data');
 		this.Users		= document.querySelector('[data-name="persistence"] ui-list#users ui-data');
@@ -32,6 +33,38 @@
 				});
 			}
 		});
+
+		document.addEventListener('click', (event) => {
+			let current = event.target.closest('[data-action]');
+
+			if(current) {
+				let action	= current.dataset.action;
+				let value		= null;
+
+				if(action.indexOf(':') !== -1) {
+					[action, value] = action.split(':', 2);
+				}
+
+				switch(action) {
+					case 'filter':
+						let exists = this.Filter.includes(value);
+
+						/* Toggle Filter */
+						if(exists) {
+							this.Filter				= this.Filter.filter((filter) => filter !== value);
+							current.dataset.active 	= false;
+						} else {
+							this.Filter.push(value);
+							current.dataset.active	= true;
+						}
+
+						document.querySelectorAll(`ui-list ui-entry[data-filter="${value}"]`).forEach((element) => {
+							element.dataset.show = !exists;
+						})
+					break;
+				}
+			}
+		});
 	}
 
 	getTimestamp(timestamp) {
@@ -47,17 +80,25 @@
 
 	onLog(data) {
 		console.log('Packet', data);
-		document.querySelector(`section[data-name="${data.serverTyp.toLowerCase()}Logs"] ui-list ui-header aside`).innerText = `${++this.Count} Packets`;
+		document.querySelector(`section[data-name="logs"] ui-list ui-header aside`).innerText = `${++this.Count.Packets} Packets`;
 
-		const scrolling		= this.ChatLogs.scrollTop + (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).clientHeight + 20 >= (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
+		const scrolling		= this.Logs.scrollTop + this.Logs.clientHeight + 20 >= this.Logs.scrollHeight;
 		const entry	= document.createElement('ui-entry');
 
-		this.setGrid((data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs), entry);
+		this.setGrid(this.Logs, entry);
+
+		if(data.serverTyp === 'CARD') {
+			entry.dataset.filter	= 'card';
+			entry.dataset.show		= this.Filter.includes('card');
+		} else {
+			entry.dataset.filter	= 'chat';
+			entry.dataset.show		= this.Filter.includes('chat');
+		}
 
 		if(data.typ.toUpperCase() === 'SERVER') {
-			entry.dataset.type				= 'INPUT';
+			entry.dataset.type	= 'INPUT';
 		} else {
-			entry.dataset.type				= 'OUTPUT';
+			entry.dataset.type	= 'OUTPUT';
 		}
 
 		/* Time */
@@ -70,7 +111,6 @@
 		if(!data.definition) {
 			if(data.serverTyp === 'CARD') {
 				console.error('###');
-
 
 				this.addEntry(entry, `${data.generic.Name}`); // todo
 			} else {
@@ -88,19 +128,19 @@
 			window.api.openLog(data.packet);
 		});
 
-		(data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).append(entry);
+		this.Logs.append(entry);
 
 		/* Scrolling */
 		if(scrolling) {
 			requestAnimationFrame(() => {
-				(data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollTop = (data.serverTyp === 'CARD' ? this.CardLogs : this.ChatLogs).scrollHeight;
+				this.Logs.scrollTop = this.Logs.scrollHeight;
 			});
 		}
 	}
 
 	onWebRequest(request) {
 		console.log('Request', request);
-		document.querySelector(`section[data-name="requests"] ui-list ui-header aside`).innerText = `${++this.CountRequests} Requests`;
+		document.querySelector(`section[data-name="requests"] ui-list ui-header aside`).innerText = `${++this.Count.Requests} Requests`;
 
 		const entry		= document.createElement('ui-entry');
 		this.setGrid(this.Requests, entry);
