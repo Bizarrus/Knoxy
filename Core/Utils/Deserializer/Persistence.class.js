@@ -29,6 +29,11 @@ export default class Persistence {
 	}
 
 	load(file) {
+		if(!FileSystem.existsSync(file)) {
+			console.warn('[Persistence] File not exists:', file);
+			return;
+		}
+
 		const buffer		= FileSystem.readFileSync(file);
 		const stream	= new ObjectInputStream(buffer);
 		const object					= stream.readObject();
