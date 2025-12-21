@@ -14,13 +14,13 @@
 
 				<aside>
 					<button data-action="dev:toggle"><i class="bi bi-bug"></i></button>
-					<button data-action="cancel"><i class="bi bi-ban"></i> Cancel</button>
-					<button data-action="save"><i class="bi bi-floppy-fill"></i> Save</button>
+					<button data-action="form:cancel"><i class="bi bi-ban"></i> Cancel</button>
+					<button data-action="form:save"><i class="bi bi-floppy-fill"></i> Save</button>
 				</aside>
 			</nav>
 
 			<ui-scroll>
-				<form>
+				<form data-action="config:save">
 					<form-entry>
 						<label for="java">Java</label>
 						<input type="text" id="java" name="java" />

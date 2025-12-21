@@ -28,6 +28,18 @@
 				}
 
 				switch(action) {
+					case 'form':
+						console.log('Form', value);
+						//<form data-action="config:save">
+						switch(value) {
+							case 'save':
+								// Fetch form data -> to JSON -> send to IPC
+							break;
+							case 'cancel':
+								// Close window
+							break;
+						}
+					break;
 					case 'dev':
 					case 'proxy':
 					case 'config':
