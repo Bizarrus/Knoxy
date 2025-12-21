@@ -59,6 +59,23 @@ export default class  extends Plugin {
 		return packet;
 	}
 
+	onGeneric(packet) {
+		/*
+		    Here you can modify/inspect the packet of the generic protocol.
+		    If you return "null" the packet will be ignored.    
+		*/
+
+		return packet;
+	}
+
+	onRequest(request) {
+		/*
+			All HTTP(s)-Requests will be hooked into this method.
+		    If you return "false" the request will be ignored. Good for blocking tracking/advertising requests.
+		*/
+		return true;
+	}
+
 	onCommand(command, args) {
 		/*
 		    Will be called, when a chat-command (/<command> <args>) is executed by the client.
