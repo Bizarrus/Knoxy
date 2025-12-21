@@ -31,6 +31,8 @@ export default class Proxy extends Events.EventEmitter {
 			let cryptoServer			= null;
 			let cryptoClient			= null;
 			let decodeKey				= null;
+			let clientHttpBuffer = Buffer.alloc(0);
+			let serverHttpBuffer = Buffer.alloc(0);
 
 			/* Incoming Connection */
 			Server.connect(this.Configuration.Endpoint.Port, this.Configuration.Endpoint.Hostname, () => {
@@ -89,11 +91,29 @@ export default class Proxy extends Events.EventEmitter {
 
 			/* Incoming Data */
 			Client.on('data', (data) => {
-				// HTTP/S direkt durch
-				if(this.isHTTPRequest(Client, data)) {
-					onlyTunnel = true;
+				// HTTP/S Request vom Client abfangen
+				if(onlyTunnel || this.isHTTPClientRequest(data)) {
+					clientHttpBuffer = Buffer.concat([clientHttpBuffer, data]);
+
+					// Prüfen ob komplette HTTP-Message vorhanden
+					if(this.isCompleteHTTPMessage(clientHttpBuffer)) {
+						const request = new Request(clientHttpBuffer);
+						this.emit('HTTP_REQUEST', 'Client', request);
+
+						if (this.Plugins && !this.Plugins.onRequest(request)) {
+							clientHttpBuffer = Buffer.alloc(0);
+							return;
+						}
+
+						Server.write(clientHttpBuffer);
+						clientHttpBuffer = Buffer.alloc(0);
+						onlyTunnel = true;
+					}
 					return;
 				}
+
+				// Reset HTTP buffer wenn kein HTTP mehr
+				clientHttpBuffer = Buffer.alloc(0);
 
 				// ===== Client Hello / DH =====
 				if(sessionType == null) {
@@ -161,11 +181,29 @@ export default class Proxy extends Events.EventEmitter {
 			});
 
 			Server.on('data', (data) => {
-				// HTTP/S direkt durch
-				if(this.isHTTPRequest(Client, data)) {
-					onlyTunnel = true;
+				// HTTP/S Response vom Server abfangen
+				if(onlyTunnel || this.isHTTPResponse(data)) {
+					serverHttpBuffer = Buffer.concat([serverHttpBuffer, data]);
+
+					// Prüfen ob komplette HTTP-Message vorhanden
+					if(this.isCompleteHTTPMessage(serverHttpBuffer)) {
+						const response = new Request(serverHttpBuffer);
+						this.emit(this.isHTTPS(data) ? 'HTTPS_RESPONSE' : 'HTTP_RESPONSE', 'Server', response);
+
+						if (this.Plugins && !this.Plugins.onRequest(response)) {
+							serverHttpBuffer = Buffer.alloc(0);
+							return;
+						}
+
+						Client.write(serverHttpBuffer);
+						serverHttpBuffer = Buffer.alloc(0);
+						onlyTunnel = true;
+					}
 					return;
 				}
+
+				// Reset HTTP buffer wenn kein HTTP mehr
+				serverHttpBuffer = Buffer.alloc(0);
 
 				sStream.feed(data);
 
@@ -222,6 +260,8 @@ export default class Proxy extends Events.EventEmitter {
 				cryptoClient	= null;
 				cryptoServer	= null;
 				onlyTunnel		= false;
+				clientHttpBuffer = Buffer.alloc(0);
+				serverHttpBuffer = Buffer.alloc(0);
 
 				Client.destroy();
 				Server.destroy();
@@ -259,27 +299,43 @@ export default class Proxy extends Events.EventEmitter {
 		return undefined;
 	}
 
-	isHTTPRequest(Client, data, onlyTunnel) {
-		// @ToDo wo kommen die Reuqests her, hier werden nur responses behandelt
-		let http 	= data.toString('utf8').startsWith(Buffer.from('HTTP/'));
-		let secured	= (data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04);
+	isCompleteHTTPMessage(buffer) {
+		const headerEndIndex = buffer.indexOf('\r\n\r\n');
 
-		if(onlyTunnel || http || secured) {
-			this.emit(secured ? 'HTTPS' : 'HTTP', 'Server', new Request(data));
-
-			if (this.Plugins) {
-				// @ToDo currently its to complex to return a request from a plugin, so we just check true/false for web-decline
-
-				// Plugin has filtered the packet, so we don't send it!
-				if(!this.Plugins.onRequest(new Request(data))) {
-					return true;
-				}
-			}
-
-			Client.write(data);
-			return true;
+		if(headerEndIndex === -1) {
+			return false;
 		}
 
-		return false;
+		const headerSection = buffer.slice(0, headerEndIndex).toString('utf8');
+		const contentLengthMatch = headerSection.match(/Content-Length:\s*(\d+)/i);
+
+		if(contentLengthMatch) {
+			const contentLength = parseInt(contentLengthMatch[1]);
+			const bodyStart = headerEndIndex + 4;
+			const receivedBodyLength = buffer.length - bodyStart;
+
+			return receivedBodyLength >= contentLength;
+		}
+
+		return true;
+	}
+
+	isHTTPClientRequest(data) {
+		const str = data.toString('utf8', 0, Math.min(data.length, 16));
+		return str.startsWith('GET ') ||
+			str.startsWith('POST ') ||
+			str.startsWith('PUT ') ||
+			str.startsWith('DELETE ') ||
+			str.startsWith('HEAD ') ||
+			str.startsWith('OPTIONS ') ||
+			str.startsWith('PATCH ');
+	}
+
+	isHTTPResponse(data) {
+		return data.toString('utf8', 0, Math.min(data.length, 9)).startsWith('HTTP/');
+	}
+
+	isHTTPS(data) {
+		return (data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04);
 	}
 }

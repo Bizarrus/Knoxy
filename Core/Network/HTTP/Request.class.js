@@ -10,17 +10,24 @@ export default class Request {
 	IsResponse		= false;
 
 	constructor(data) {
-		data = data.toString();
+		if(!Buffer.isBuffer(data)) {
+			data = Buffer.from(data);
+		}
 
-		const parts			= data.split('\r\n\r\n');
-		const headerSection	= parts[0];
-		const bodySection	= parts.slice(1).join('\r\n\r\n');
+		const headerEndIndex = data.indexOf('\r\n\r\n');
+
+		if(headerEndIndex === -1) {
+			throw new Error('Invalid HTTP message: no header/body separator found');
+		}
+
+		const headerSection	= data.slice(0, headerEndIndex).toString('utf8');
+		const bodyStart		= headerEndIndex + 4;
+
+		if(bodyStart < data.length) {
+			this.Content = data.slice(bodyStart);
+		}
 
 		this.parseHeaders(headerSection);
-
-		if(bodySection && bodySection.trim()) {
-			this.Content = bodySection;
-		}
 	}
 
 	parseHeaders(headerSection) {

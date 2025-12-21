@@ -22,6 +22,8 @@ export default class DownloadImages extends Plugin {
 	}
 
 	onRequest(request) {
+		console.log('Request', request);
+
 		if(request.hasHeader('Content-Type')) {
 			let extension = null;
 

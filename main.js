@@ -247,21 +247,31 @@ class Main {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
 
-		this.ChatProxy.on('HTTP', (type, request) => {
-			//console.error('[HTTP] Request', request);
+
+		this.ChatProxy.on('HTTP_REQUEST', (type, request) => {
+			console.log('[HTTP] Request:', request.getMethod(), request.getPath());
 			this.MainWindow.send('web:request', {
-				type:		type,
-				secured:	false,
-				request:	request
+				type: 'request',
+				secured: false,
+				request: request
 			});
 		});
 
-		this.ChatProxy.on('HTTPS', (type, request) => {
-			//console.error('[HTTPS] Request', request);
-			this.MainWindow.send('web:request', {
-				type:		type,
-				secured:	true,
-				request:	request
+		this.ChatProxy.on('HTTP_RESPONSE', (type, response) => {
+			console.log('[HTTP] Response:', response.getStatusCode());
+			this.MainWindow.send('web:response', {
+				type: 'response',
+				secured: false,
+				response: response
+			});
+		});
+
+		this.ChatProxy.on('HTTPS_RESPONSE', (type, response) => {
+			console.log('[HTTPS] Response:', response.getStatusCode());
+			this.MainWindow.send('web:response', {
+				type: 'response',
+				secured: true,
+				response: response
 			});
 		});
 
