@@ -31,7 +31,7 @@ If you want to create a plugin, you can use two different ways:
 2. Multi-File (`/Plugins/<YourPluginName>/<YourPluginName>.js` or `/Plugins/<YourPluginName/main.js`)
 
 The main-plugin files must be implemented the `Plugin` class, the Name of the class must be the same as the file/folder name.
-```!javascript
+```javascript
 // If you using single-file-plugins
 import Plugin from '../Core/Plugin.class.js';
 // If you using a plugin with an folder
