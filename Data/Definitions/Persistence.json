@@ -1,32 +1,35 @@
-[
-  {
-    "key":        "KnLL",
-    "name":       "Login Location",
-    "type":       "String",
-    "description": ""
-  },
-  {
-    "key":        "KnRi",
-    "name":       "",
-    "type":       "String",
-    "description": ""
-  },
-  {
-    "key":        "firstTry",
-    "name":       "First Try",
-    "type":       "Boolean",
-    "description": ""
-  },
-  {
-    "key":        "firstPwd",
-    "name":       "First Password",
-    "type":       "Boolean",
-    "description": ""
-  },
-  {
-    "key":        "standaloneFriststart",
-    "name":       "First Password",
-    "type":       "Boolean",
-    "description": ""
-  }
-]
+{
+  "config": [
+    {
+      "key": "KnLL",
+      "name": "Login Location",
+      "type": "String",
+      "description": ""
+    },
+    {
+      "key": "KnRi",
+      "name": "",
+      "type": "String",
+      "description": ""
+    },
+    {
+      "key": "firstTry",
+      "name": "First Try",
+      "type": "Boolean",
+      "description": ""
+    },
+    {
+      "key": "firstPwd",
+      "name": "First Password",
+      "type": "Boolean",
+      "description": ""
+    },
+    {
+      "key": "standaloneFriststart",
+      "name": "First Password",
+      "type": "Boolean",
+      "description": ""
+    }
+  ],
+  "users": {}
+}
