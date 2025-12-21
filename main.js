@@ -68,7 +68,33 @@ class Main {
 					case 'client':
 						switch(value) {
 							case 'start':
+								if(this.Client.isRunning()) {
+									webContents.send('dialog', 'Client is already running!');
+									return;
+								}
+
 								this.Client.open(this.Configuration.Chat.Proxy.Port);
+							break;
+							case 'stop':
+								if(!this.Client.isRunning()) {
+									webContents.send('dialog', 'Client is not running!');
+									return;
+								}
+
+								this.Client.close();
+							break;
+						}
+					break;
+					case 'proxy':
+						switch(value) {
+							case 'start':
+								// @ToDo Start the proxy
+							break;
+							case 'stop':
+								// @ToDo Stop the proxy
+							break;
+							case 'toggle':
+								// @ToDo Start/stop toggle proxy
 							break;
 						}
 					break;
@@ -90,7 +116,7 @@ class Main {
 						}
 					break;
 					default:
-						console.log('[Action]', action, value, data);
+						console.warn('[Action] Unknown Action:', action, value, data);
 					break;
 				}
 			});

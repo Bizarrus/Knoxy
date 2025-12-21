@@ -16,6 +16,7 @@
 		this.Users		= document.querySelector('[data-name="persistence"] ui-list#users ui-data');
 
 		[
+			'onDialog',
 			'onLog',
 			'onWebRequest',
 			'onPersistenceConfig',
@@ -206,5 +207,9 @@
 
 	setGrid(container, element) {
 		element.style.gridTemplateColumns	= container.parentNode.querySelector('ui-header').style.gridTemplateColumns;
+	}
+
+	onDialog(text) {
+		alert(text);
 	}
 }());

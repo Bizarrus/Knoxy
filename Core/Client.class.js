@@ -7,6 +7,7 @@ import OS from 'node:os';
 export default class Client {
 	Path			= './Cache/Client';
 	Stream		= 'alpha';
+	Process		= null;
 	InstallDir		= null;
 	Java			= null;
 
@@ -59,5 +60,15 @@ export default class Client {
 		});
 
 		return this.Process;
+	}
+
+	close() {
+		if(this.isRunning()) {
+			this.Process.kill();
+		}
+	}
+
+	isRunning() {
+		return (this.Process !== null);
 	}
 }
