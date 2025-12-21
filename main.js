@@ -59,6 +59,16 @@ class Main {
 					this.LogWindow.send('log', data);
 				});
 			});
+
+			ipcMain.on('toggle-devtools', (event) => {
+				const webContents = event.sender;
+
+				if(webContents.isDevToolsOpened()) {
+					webContents.closeDevTools();
+				} else {
+					webContents.openDevTools();
+				}
+			});
 		});
 
 		this.ChatProxy.on('started', (port) => {
@@ -171,7 +181,7 @@ class Main {
 		});
 
 		this.ChatProxy.on('HTTP', (type, request) => {
-			console.error('[HTTP] Request', request);
+			//console.error('[HTTP] Request', request);
 			this.MainWindow.send('web:request', {
 				type:		type,
 				secured:	false,

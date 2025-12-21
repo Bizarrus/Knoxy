@@ -7,8 +7,10 @@ export default class MainWindow {
 
 	init() {
 		this.Window = new BrowserWindow({
-			width:			800,
-			height:			600,
+			width:				800,
+			height:				600,
+			icon:				Path.join(Process.cwd(), 'UI', 'Assets', 'Icon.png'),
+			autoHideMenuBar:	true,
 			webPreferences: {
 				preload:			Path.join(Process.cwd(), 'UI', 'preload.js'),
 				contextIsolation:	true,

@@ -268,12 +268,12 @@ export default class Proxy extends Events.EventEmitter {
 			this.emit(secured ? 'HTTPS' : 'HTTP', 'Server', new Request(data));
 
 			if (this.Plugins) {
-				data = this.Plugins.onRequest(data);
-			}
+				// @ToDo currently its to complex to return a request from a plugin, so we just check true/false for web-decline
 
-			// Plugin has filtered the packet, so we don't send it!
-			if(data === null) {
-				return true;
+				// Plugin has filtered the packet, so we don't send it!
+				if(!this.Plugins.onRequest(new Request(data))) {
+					return true;
+				}
 			}
 
 			Client.write(data);

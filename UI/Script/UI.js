@@ -46,6 +46,9 @@
 				}
 
 				switch(action) {
+					case 'dev':
+						window.api.toggleDevTools();
+					break;
 					case 'filter':
 						let exists = this.Filter.includes(value);
 
