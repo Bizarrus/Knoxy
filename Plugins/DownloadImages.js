@@ -6,7 +6,7 @@ import FileSystem from 'node:fs';
 import Path from 'node:path';
 import Crypto from 'node:crypto';
 
-export default class ExamplePlugin extends Plugin {
+export default class DownloadImages extends Plugin {
 	Destination = './Cache/Images/';
 
 	constructor() {

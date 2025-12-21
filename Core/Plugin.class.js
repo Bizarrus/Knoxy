@@ -40,7 +40,7 @@ export default class Plugin {
 	*/
 	onRequest(request) {
 		/* Override Me */
-		return request;
+		return true;
 	}
 
 
