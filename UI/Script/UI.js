@@ -75,6 +75,8 @@
 				}
 			}
 		});
+
+		window.api.onInit();
 	}
 
 	getTimestamp(timestamp) {
@@ -135,7 +137,7 @@
 		}
 
 		entry.addEventListener('dblclick', () => {
-			window.api.action('log', 'open', data.packet);
+			window.api.action('log', 'open', data);
 		});
 
 		this.Logs.append(entry);
@@ -246,6 +248,7 @@
 	}
 
 	onPersistenceConfig(config) {
+		this.Config.innerHTML = '';
 		console.log('Config', config);
 
 		for(const [key, val] of Object.entries(config)) {
@@ -263,6 +266,7 @@
 	}
 
 	onPersistenceUsers(users) {
+		this.Users.innerHTML = '';
 		console.log('Users', users);
 
 		for(const [key, user] of Object.entries(users)) {

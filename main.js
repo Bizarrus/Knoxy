@@ -50,7 +50,7 @@ class Main {
 				this.MainWindow.send('persistence:users', this.Client.getPersistence().getUsers());
 			})
 
-			ipcMain.on('refresh', (event, data) => {
+			ipcMain.on('init', (event, data) => {
 				this.MainWindow.send('persistence:config', this.Client.getPersistence().getConfig());
 				this.MainWindow.send('persistence:users', this.Client.getPersistence().getUsers());
 			});
@@ -60,10 +60,11 @@ class Main {
 
 				switch(action) {
 					case 'log':
+						console.log(action, value, data);
 						this.LogWindow.init(this.MainWindow).then(() => {
 							this.LogWindow.send('log', data);
 						});
-						break;
+					break;
 					case 'client':
 						let clientState = false;
 

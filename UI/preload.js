@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('api', {
 	onLog:					(callback) => ipcRenderer.on('log', (_, data) => callback(data)),
 	onDialog:				(callback) => ipcRenderer.on('dialog', (_, data) => callback(data)),
 	onButtonChange:			(callback) => ipcRenderer.on('button', (_, data) => callback(data)),
-	action:					(action, value) => ipcRenderer.send('action', action, value)
+	onInit:					() => ipcRenderer.send('init'),
+	action:					(action, value, data) => ipcRenderer.send('action', action, value, data)
 });

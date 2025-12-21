@@ -33,15 +33,20 @@
 
 				switch(action) {
 					case 'dev':
-						window.api.toggleDevTools();
+					case 'proxy':
+					case 'config':
+					case 'client':
+						window.api.action(action, value);
 					break;
 				}
 			}
 		});
 	}
 
-	onLog(raw) {
-		// @ToDo add more characters
+	onLog(log) {
+		let raw = log.packet;
+
+		// @ToDo add more characters(?)
 		raw = raw.replace(/[\0]+/g, '<ui-char>\\0</ui-char>');
 		raw = raw.replace(/[\r]+/g, '<ui-char>\\r</ui-char>');
 		raw = raw.replace(/[\n]+/g, '<ui-char>\\n</ui-char>\n');
