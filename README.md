@@ -1,4 +1,7 @@
-# Knoxy
+<p align="center">
+  <img width="200" height="200" src="UI/Assets/Logo.png" />
+</p>
+
 Knuddels Proxy only in JavaScript with integrated inspectors and plugin management, can be used for botting, analyzing, reverse engineering and some more.
 
 #### Features
