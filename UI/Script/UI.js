@@ -20,6 +20,7 @@
 			'onButtonChange',
 			'onLog',
 			'onWebRequest',
+			'onWebResponse',
 			'onPersistenceConfig',
 			'onPersistenceUsers'
 		].forEach((name) => {
@@ -153,10 +154,33 @@
 		const entry		= document.createElement('ui-entry');
 		this.setGrid(this.Requests, entry);
 
-		/* Timestamp */
-		this.addEntry(entry, request.Headers);
+		//request.type == 'request'
+		//request.secured
+
+		/* Time */
+		this.addEntry(entry, this.getTimestamp());
+
+		/* Method */
+		this.addEntry(entry, request.request.Method);
+
+		/* Path */
+		this.addEntry(entry, request.request.Path);
+
+		/* Data */
+		this.addEntry(entry, request.request.Content);
+
+		// @ToDo Request is currently loading, adding load-Indicator & wait for onWebResponse
 
 		this.Requests.append(entry);
+	}
+
+	onWebResponse(request) {
+		console.log('Response', request);
+
+		//request.type == 'response'
+		//request.secured
+
+		// @ToDo add to the Request
 	}
 
 	onPersistenceConfig(config) {

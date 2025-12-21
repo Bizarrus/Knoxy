@@ -9,6 +9,7 @@ export default class Request {
 	StatusMessage		= null;
 	IsResponse		= false;
 
+	// @ToDo bad name? Request can be also an Response, rename class to HTTPPacket(?)
 	constructor(data) {
 		if(!Buffer.isBuffer(data)) {
 			data = Buffer.from(data);

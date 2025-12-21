@@ -39,7 +39,7 @@ class Main {
 		this.Client			= new Client();
 		this.ChatProxy		= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
 		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
-		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt');
+		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt'); // @ToDo where are these files?
 		this.CardTree		= new GenericTree('./Data/GenericCardTree.txt');
 		this.MainWindow		= new MainWindow();
 		this.LogWindow		= new LogWindow();
