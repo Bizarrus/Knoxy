@@ -35,6 +35,10 @@ button {
     background: rgba(255, 255, 255, 0.65);
 }
 
+button * {
+    cursor: pointer !important;
+}
+
 button:hover {
     background: rgba(255, 255, 255, 0.9);
 }
@@ -102,8 +106,14 @@ nav label:hover {
     background: #1a252f;
 }
 
-nav aside {
+nav center {
     flex: 1 0 auto;
+    text-align: center;
+    align-content: center;
+}
+
+nav aside {
+    flex: 0 0 auto;
     text-align: end;
     align-content: center;
 }

@@ -2,11 +2,11 @@
  * @author  Bizarrus, SeBiTM
  **/
 import Proxy from './Core/Network/Proxy.class.js';
+import Client from './Core/Client.class.js';
 import GenericTree from './Core/Network/Tree.class.js';
 import Plugins from './Core/Plugins.class.js';
 import LogWindow from './Core/Window/Log.class.js';
 import MainWindow from './Core/Window/Main.class.js';
-import Persistence from './Core/Utils/Deserializer/Persistence.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import Chalk from 'chalk';
 import util from 'node:util';
@@ -36,37 +36,62 @@ class Main {
 
 	constructor() {
 		this.Plugins		= new Plugins();
+		this.Client			= new Client();
 		this.ChatProxy		= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
 		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
 		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt');
 		this.CardTree		= new GenericTree('./Data/GenericCardTree.txt');
-		this.Persistence	= new Persistence();
 		this.MainWindow		= new MainWindow();
 		this.LogWindow		= new LogWindow();
 
-		/* Loading StApp Persistence */
-		// @ToDo vielleicht move des Clienten im Sub-Directory mit anderem cwd()? Würde das Haupt-Verzeichnis nicht so zumüllen!
-		this.Persistence.load('./persistence2.data');
-
 		app.whenReady().then(() => {
 			this.MainWindow.init().then(() => {
-				this.MainWindow.send('persistence:config', this.Persistence.getConfig());
-				this.MainWindow.send('persistence:users', this.Persistence.getUsers());
+				this.MainWindow.send('persistence:config', this.Client.getPersistence().getConfig());
+				this.MainWindow.send('persistence:users', this.Client.getPersistence().getUsers());
 			})
 
-			ipcMain.on('open-log', (event, data) => {
-				this.LogWindow.init(this.MainWindow).then(() => {
-					this.LogWindow.send('log', data);
-				});
+			// @ToDo when UI was reloaded
+			ipcMain.on('refresh', (event, data) => {
+				this.MainWindow.send('persistence:config', this.Client.getPersistence().getConfig());
+				this.MainWindow.send('persistence:users', this.Client.getPersistence().getUsers());
 			});
 
-			ipcMain.on('toggle-devtools', (event) => {
+			ipcMain.on('action', (event, action, value, data) => {
 				const webContents = event.sender;
 
-				if(webContents.isDevToolsOpened()) {
-					webContents.closeDevTools();
-				} else {
-					webContents.openDevTools();
+				switch(action) {
+					case 'log':
+						this.LogWindow.init(this.MainWindow).then(() => {
+							this.LogWindow.send('log', data);
+						});
+					break;
+					case 'client':
+						switch(value) {
+							case 'start':
+								this.Client.open(this.Configuration.Chat.Proxy.Port);
+							break;
+						}
+					break;
+					case 'dev':
+						switch(value) {
+							case 'toggle':
+								if(webContents.isDevToolsOpened()) {
+									webContents.closeDevTools();
+								} else {
+									webContents.openDevTools();
+								}
+							break;
+							case 'open':
+								webContents.openDevTools();
+							break;
+							case 'close':
+								webContents.closeDevTools();
+							break;
+						}
+					break;
+					default:
+						console.log('[Action]', action, value, data);
+					break;
 				}
 			});
 		});

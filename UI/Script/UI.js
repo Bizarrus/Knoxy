@@ -47,7 +47,10 @@
 
 				switch(action) {
 					case 'dev':
-						window.api.toggleDevTools();
+					case 'proxy':
+					case 'config':
+					case 'client':
+						window.api.action(action, value);
 					break;
 					case 'filter':
 						let exists = this.Filter.includes(value);
@@ -55,14 +58,14 @@
 						/* Toggle Filter */
 						if(exists) {
 							this.Filter				= this.Filter.filter((filter) => filter !== value);
-							current.dataset.active 	= false;
+							current.dataset.active 	= 'false';
 						} else {
 							this.Filter.push(value);
-							current.dataset.active	= true;
+							current.dataset.active	= 'true';
 						}
 
 						document.querySelectorAll(`ui-list ui-entry[data-filter="${value}"]`).forEach((element) => {
-							element.dataset.show = !exists;
+							element.dataset.show = (!exists ? 'true' : 'false');
 						})
 					break;
 				}
@@ -92,10 +95,10 @@
 
 		if(data.serverTyp === 'CARD') {
 			entry.dataset.filter	= 'card';
-			entry.dataset.show		= this.Filter.includes('card');
+			entry.dataset.show		= this.Filter.includes('card') ? 'true' : 'false';
 		} else {
 			entry.dataset.filter	= 'chat';
-			entry.dataset.show		= this.Filter.includes('chat');
+			entry.dataset.show		= this.Filter.includes('chat') ? 'true' : 'false';
 		}
 
 		if(data.typ.toUpperCase() === 'SERVER') {
@@ -128,7 +131,7 @@
 		}
 
 		entry.addEventListener('dblclick', () => {
-			window.api.openLog(data.packet);
+			window.api.action('log', 'open', data.packet);
 		});
 
 		this.Logs.append(entry);

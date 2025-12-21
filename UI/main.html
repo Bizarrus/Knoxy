@@ -22,8 +22,14 @@
 				<!--<label for="plugins">Plugins</label>-->
 				<label for="persistence">Persistence</label>
 
+				<center>
+					<button data-action="proxy:toggle" data-active="true" title="Start/stop Proxy"><i class="bi bi-play-fill"></i></button>
+					<button data-action="client:start" title="Start Client"><i class="bi bi-fullscreen"></i></button>
+					<button data-action="dev:toggle" title="Open DevTools"><i class="bi bi-bug"></i></button>
+					<button data-action="config:open" title="Configuration"><i class="bi bi-gear-fill"></i></button>
+				</center>
+
 				<aside>
-					<button data-action="dev"><i class="bi bi-bug"></i> DevTools</button>
 					<button data-action="filter:chat" data-active="true"><i class="bi bi-chat-text"></i> Chatserver</button>
 					<button data-action="filter:card" data-active="true"><i class="bi bi-suit-spade"></i> Card Games</button>
 				</aside>

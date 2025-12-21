@@ -39,7 +39,7 @@ export default class ExamplePlugin extends Plugin {
 					extension = 'gif';
 				break;
 				default:
-					console.warn('Unknown Image Type:'. request.getHeader('Content-Type'));
+					console.warn('Unknown Image Type:', request);
 				break;
 			}
 
