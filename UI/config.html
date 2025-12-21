@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Config</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="CSS/Icons.css" />
+		<link rel="stylesheet" href="CSS/Globals.css" />
+	</head>
+	<body>
+		<main>
+			<nav>
+				<center></center>
+
+				<aside>
+					<button data-action="dev:toggle"><i class="bi bi-bug"></i></button>
+					<button data-action="cancel"><i class="bi bi-ban"></i> Cancel</button>
+					<button data-action="save"><i class="bi bi-floppy-fill"></i> Save</button>
+				</aside>
+			</nav>
+
+			<ui-scroll>
+				<form>
+					<form-entry>
+						<label for="java">Java</label>
+						<input type="text" id="java" name="java" />
+					</form-entry>
+					<form-entry>
+						<label for="version">Update-Stream</label>
+						<select id="version" name="version">
+							<option value="">Production</option>
+							<option value="alpha">Alpha</option>
+							<option value="beta">Beta</option>
+						</select>
+					</form-entry>
+				</form>
+			</ui-scroll>
+		</main>
+		<script src="Script/Config.js"></script>
+	</body>
+</html>

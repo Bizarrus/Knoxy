@@ -7,6 +7,7 @@ import GenericTree from './Core/Network/Tree.class.js';
 import Plugins from './Core/Plugins.class.js';
 import LogWindow from './Core/Window/Log.class.js';
 import MainWindow from './Core/Window/Main.class.js';
+import ConfigWindow from './Core/Window/Config.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import Chalk from 'chalk';
 import util from 'node:util';
@@ -43,6 +44,7 @@ class Main {
 		this.CardTree		= new GenericTree('./Data/GenericCardTree.txt');
 		this.MainWindow		= new MainWindow();
 		this.LogWindow		= new LogWindow();
+		this.ConfigWindow	= new ConfigWindow();
 
 		app.whenReady().then(() => {
 			this.MainWindow.init().then(() => {
@@ -65,6 +67,14 @@ class Main {
 							this.LogWindow.send('log', data);
 						});
 					break;
+					case 'config':
+						this.ConfigWindow.init(this.MainWindow).then(() => {
+							this.ConfigWindow.send('client', {
+								java:			this.Client.getJavaPath(),
+								version:		this.Client.getUpdateStream()
+							});
+						});
+					break;
 					case 'client':
 						let clientState = false;
 
@@ -76,7 +86,7 @@ class Main {
 									this.Client.open(this.Configuration.Chat.Proxy.Port);
 									clientState = true;
 								}
-								break;
+							break;
 							case 'start':
 								if(this.Client.isRunning()) {
 									webContents.send('dialog', 'Client is already running!');
@@ -85,7 +95,7 @@ class Main {
 
 								this.Client.open(this.Configuration.Chat.Proxy.Port);
 								clientState = true;
-								break;
+							break;
 							case 'stop':
 								if(!this.Client.isRunning()) {
 									webContents.send('dialog', 'Client is not running!');
@@ -93,27 +103,27 @@ class Main {
 								}
 
 								this.Client.close();
-								break;
+							break;
 						}
 
 						webContents.send('button', {
 							action:		'client:toggle',
 							state:		clientState
 						});
-						break;
+					break;
 					case 'proxy':
 						switch(value) {
 							case 'start':
 								// @ToDo Start the proxy
-								break;
+							break;
 							case 'stop':
 								// @ToDo Stop the proxy
-								break;
+							break;
 							case 'toggle':
 								// @ToDo Start/stop toggle proxy
-								break;
+							break;
 						}
-						break;
+					break;
 					case 'dev':
 						switch(value) {
 							case 'toggle':
@@ -122,18 +132,18 @@ class Main {
 								} else {
 									webContents.openDevTools();
 								}
-								break;
+							break;
 							case 'open':
 								webContents.openDevTools();
-								break;
+							break;
 							case 'close':
 								webContents.closeDevTools();
-								break;
+							break;
 						}
-						break;
+					break;
 					default:
 						console.warn('[Action] Unknown Action:', action, value, data);
-						break;
+					break;
 				}
 			});
 		});

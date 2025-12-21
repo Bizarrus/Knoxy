@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
 	onWebResponse:			(callback) => ipcRenderer.on('web:response', (_, data) => callback(data)),
 	onLog:					(callback) => ipcRenderer.on('log', (_, data) => callback(data)),
 	onDialog:				(callback) => ipcRenderer.on('dialog', (_, data) => callback(data)),
+	onClientConfig:			(callback) => ipcRenderer.on('client', (_, data) => callback(data)),
 	onButtonChange:			(callback) => ipcRenderer.on('button', (_, data) => callback(data)),
 	onInit:					() => ipcRenderer.send('init'),
 	action:					(action, value, data) => ipcRenderer.send('action', action, value, data)

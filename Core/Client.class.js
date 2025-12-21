@@ -25,8 +25,16 @@ export default class Client {
 		this.Persistence.load(Path.join(this.Path, 'persistence2.data'));
 	}
 
+	getJavaPath() {
+		return this.Java;
+	}
+
 	getPersistence() {
 		return this.Persistence;
+	}
+
+	getUpdateStream() {
+		return this.Stream;
 	}
 
 	open(port) {
