@@ -2,18 +2,15 @@
  * @author  Bizarrus, SeBiTM
  **/
 import Proxy from './Core/Network/Proxy.class.js';
+import GenericTree from './Core/Network/Tree.class.js';
 import Plugins from './Core/Plugins.class.js';
+import LogWindow from './Core/Window/Log.class.js';
+import MainWindow from './Core/Window/Main.class.js';
+import Persistence from './Core/Utils/Deserializer/Persistence.class.js';
 import Definitions from './Core/Network/Protocol/Definitions.class.js';
-import GenericProtocol from './Core/Network/Protocol/Generic/GenericProtocol.class.js';
 import Chalk from 'chalk';
-import fs from 'node:fs';
 import util from 'node:util';
-import { app, BrowserWindow, ipcMain } from 'electron';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-
-const __filename	= fileURLToPath(import.meta.url);
-const __dirname	= dirname(__filename);
+import { app, ipcMain } from 'electron';
 
 class Main {
 	Configuration = {
@@ -34,49 +31,44 @@ class Main {
 				Hostname:	'chat.knuddels.de',
 				Port:		2810
 			}
-		},
+		}
 	};
 
 	constructor() {
-		this.Plugins	= new Plugins();
-		this.ChatProxy	= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
-		this.CardProxy	= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
+		this.Plugins		= new Plugins();
+		this.ChatProxy		= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
+		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
+		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt');
+		this.CardTree		= new GenericTree('./Data/GenericCardTree.txt');
+		this.Persistence	= new Persistence();
+		this.MainWindow		= new MainWindow();
+		this.LogWindow		= new LogWindow();
 
-		this.lastestUpdatedChatTree = null;
-		this.lastestUpdatedCardTree = null;
-		
-		let win;
+		/* Loading StApp Persistence */
+		// @ToDo vielleicht move des Clienten im Sub-Directory mit anderem cwd()? Würde das Haupt-Verzeichnis nicht so zumüllen!
+		this.Persistence.load('./persistence2.data');
 
 		app.whenReady().then(() => {
-			win = new BrowserWindow({
-				width:	800,
-				height: 600,
-				webPreferences: {
-					preload:			join(__dirname, 'UI', 'preload.js'),
-					contextIsolation:	true,
-					nodeIntegration:	false
+			this.MainWindow.init().then(() => {
+				this.MainWindow.send('persistence:config', this.Persistence.getConfig());
+				this.MainWindow.send('persistence:users', this.Persistence.getUsers());
+			})
+
+			ipcMain.on('open-log', (event, data) => {
+				this.LogWindow.init(this.MainWindow).then(() => {
+					this.LogWindow.send('log', data);
+				});
+			});
+
+			ipcMain.on('toggle-devtools', (event) => {
+				const webContents = event.sender;
+
+				if(webContents.isDevToolsOpened()) {
+					webContents.closeDevTools();
+				} else {
+					webContents.openDevTools();
 				}
 			});
-
-			ipcMain.on('open-log', (e, data) => {
-				console.log('OPEN', data);
-
-				const logWin = new BrowserWindow({
-					width:	600,
-					height: 800,
-					webPreferences: {
-						preload: join(__dirname, "UI", "preload.js")
-					}
-				});
-
-				logWin.loadFile(join(__dirname, 'UI', 'log.html'));
-
-				logWin.webContents.once('did-finish-load', () => {
-					logWin.webContents.send('log', data);
-				});
-			});
-
-			win.loadFile(join(__dirname, 'UI', 'main.html'));
 		});
 
 		this.ChatProxy.on('started', (port) => {
@@ -91,53 +83,29 @@ class Main {
 			console.log(session, '[Type]', typ);
 		});
 
-		let color_swap			= true;
-		const genericChatTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericChatTree.txt').toString('utf8'));
-		const genericCardTree = GenericProtocol.parseTree(fs.readFileSync('./Data/GenericCardTree.txt').toString('utf8'));
-
-		const handleTreeUpdate = (tree, generic, isCard) => {
-			if (generic.getName() === 'CONFIRM_PROTOCOL_HASH') {
-				if (isCard) {
-					if (this.lastestUpdatedCardTree) { // reuse latest stored GenericTree (after reconnect)
-						tree.updateTree(this.lastestUpdatedCardTree);
-					}
-				} else {
-					if (this.lastestUpdatedChatTree) { // reuse latest stored GenericTree (after reconnect)
-						tree.updateTree(this.lastestUpdatedChatTree);
-					}
-				}
-			} else if(generic.getName() === 'CHANGE_PROTOCOL') {
-				if (isCard) {
-					this.lastestUpdatedCardTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
-					tree.updateTree(this.lastestUpdatedCardTree);
-				} else {
-					this.lastestUpdatedChatTree = generic.get('PROTOCOL_DATA').value; // store latest GenericTree
-					tree.updateTree(this.lastestUpdatedChatTree);
-				}
-				console.info('Protocol changed', tree.hash);
-			}
-		};
+		let color_swap	= true;
 
 		// CardProxy test
 		this.CardProxy.on('packet', (session, typ, buffer) => {
-			let generic = genericCardTree.read(buffer);
+			let genericCardTree	= this.CardTree.get();
+			let generic			= genericCardTree.read(buffer);
 
-			handleTreeUpdate(genericCardTree, generic);
+			this.CardTree.handleUpdate(genericCardTree, generic);
 
-			if(win) {
-				win.webContents.send('log', {
-					serverTyp:	'CARD',
-					session:	session,
-					typ:		typ,
-					packet:		buffer,
-					hex:		buffer.toString('hex'),
-					generic:	generic ? generic.toJSON() : undefined
-				});
-			}
+			this.MainWindow.send('log', {
+				serverTyp:	'CARD',
+				session:	session,
+				typ:		typ,
+				packet:		buffer,
+				hex:		buffer.toString('hex'),
+				generic:	generic ? generic.toJSON() : undefined
+			});
+
 			console.log(typ, buffer);
 			console.log(generic.toJSON());
 			return buffer;
 		});
+
 		this.CardProxy.on('exception', (type, session, error) => {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
@@ -164,36 +132,46 @@ class Main {
 			// CLI-Mode
 			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
 
-			let generic = null;
+			let generic	= null;
+			let genericChatTree = this.ChatTree.get();
 
-			if(opcode === ':' || opcode === 'q') {
-				generic = genericChatTree.read(packet, 2);
+			try {
+				if(opcode === ':' || opcode === 'q') {
+					if(genericChatTree !== null) {
+						generic = genericChatTree.read(packet, 2);
 
-				console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), { colors: true, depth: null, compact: false })));
+						console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), {
+							colors: true,
+							depth: null,
+							compact: false
+						})));
 
-				handleTreeUpdate(genericChatTree, generic);
-				
-				const p = opcode + '\0' + genericChatTree.write(generic);
+						this.ChatTree.handleUpdate(genericChatTree, generic);
 
-				if(p !== packet) {
-					console.log('FAIL   ', generic.getName());
-					console.log('       ', Buffer.from(packet).toString('hex'));
-					console.log('       ', Buffer.from(p).toString('hex'));
+						const p = opcode + '\0' + genericChatTree.write(generic);
+
+						if(p !== packet) {
+							console.log('FAIL   ', generic.getName());
+							console.log('       ', Buffer.from(packet).toString('hex'));
+							console.log('       ', Buffer.from(p).toString('hex'));
+						}
+					}
 				}
+			// catch exceptions, otherwise, the packet will be sent to the server.
+			} catch(error) {
+				console.error(error);
 			}
 
 			// Send Definition to UI
-			if(win) {
-				win.webContents.send('log', {
-					serverTyp:	'CHAT',
-					session:	session,
-					typ:		typ,
-					packet:		packet,
-					hex:		Buffer.from(packet).toString('hex'),
-					definition:	definition,
-					generic:	generic ? generic.toJSON() : undefined
-				});
-			}
+			this.MainWindow.send('log', {
+				serverTyp:	'CHAT',
+				session:	session,
+				typ:		typ,
+				packet:		packet,
+				hex:		Buffer.from(packet).toString('hex'),
+				definition:	definition,
+				generic:	generic ? generic.toJSON() : undefined
+			});
 
 			return packet;
 		});
@@ -202,11 +180,22 @@ class Main {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
 
-		this.ChatProxy.on('HTTP', (session, typ, data) => {
-			//console.error('[HTTP] Request', session, typ, data.toString('utf8'));
+		this.ChatProxy.on('HTTP', (type, request) => {
+			//console.error('[HTTP] Request', request);
+			this.MainWindow.send('web:request', {
+				type:		type,
+				secured:	false,
+				request:	request
+			});
 		});
-		this.ChatProxy.on('HTTPS', (session, typ, data) => {
-			//console.error('[HTTPS] Request', session, typ, data);
+
+		this.ChatProxy.on('HTTPS', (type, request) => {
+			//console.error('[HTTPS] Request', request);
+			this.MainWindow.send('web:request', {
+				type:		type,
+				secured:	true,
+				request:	request
+			});
 		});
 
 		this.ChatProxy.on('disconnect', (session, type) => {

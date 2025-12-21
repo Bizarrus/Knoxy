@@ -8,64 +8,81 @@
 		<link rel="stylesheet" href="CSS/Globals.css" />
 	</head>
 	<body>
-		<header>
-			<h1>
-				<i class="bi bi-file-earmark-text"></i>
-				<span>Kn</span>oxy
-			</h1>
-		</header>
 		<main>
-			<input type="radio" name="tabs" id="logs" checked>
-			<input type="radio" name="tabs" id="tree">
-			<input type="radio" name="tabs" id="plugins">
+			<input type="radio" name="tabs" id="logs" checked />
+			<input type="radio" name="tabs" id="tree" />
+			<input type="radio" name="tabs" id="requests" />
+			<input type="radio" name="tabs" id="plugins" />
+			<input type="radio" name="tabs" id="persistence" />
 
-			<input type="radio" name="innerTabs" id="chatLogs" checked>
-			<input type="radio" name="innerTabs" id="cardLogs">
-		
 			<nav>
 				<label for="logs">Logs</label>
 				<!--<label for="tree">Generic Tree</label>-->
+				<label for="requests">Requests</label>
 				<!--<label for="plugins">Plugins</label>-->
+				<label for="persistence">Persistence</label>
+
+				<aside>
+					<button data-action="dev"><i class="bi bi-bug"></i> DevTools</button>
+					<button data-action="filter:chat" data-active="true"><i class="bi bi-chat-text"></i> Chatserver</button>
+					<button data-action="filter:card" data-active="true"><i class="bi bi-suit-spade"></i> Card Games</button>
+				</aside>
 			</nav>
 
 			<section data-name="logs">
-				<nav>
-					<label for="chatLogs">Chat</label>
-					<label for="cardLogs">Card</label>
-				</nav>
-
-				<section data-name="chatLogs">
-					<ui-logs>
-						<ui-header>
-							<div>Timestamp</div>
-							<div>Session</div>
-							<div>Data</div>
-							<div>0 Packets</div>
-						</ui-header>
-						<ui-data></ui-data>
-					</ui-logs>
-				</section>
-
-				<section data-name="cardLogs">
-					<ui-logs>
-						<ui-header>
-							<div>Timestamp</div>
-							<div>Session</div>
-							<div>Data</div>
-							<div>0 Packets</div>
-						</ui-header>
-						<ui-data></ui-data>
-					</ui-logs>
-				</section>
+				<ui-list>
+					<ui-header style="grid-template-columns: 155px 210px 1fr 1fr;">
+						<div>Timestamp</div>
+						<div>Session</div>
+						<div>Data</div>
+						<aside>0 Packets</aside>
+					</ui-header>
+					<ui-data></ui-data>
+				</ui-list>
 			</section>
 			<section data-name="tree">
 				tree
 			</section>
+			<section data-name="requests">
+				<ui-list>
+					<ui-header style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
+						<div>Timestamp</div>
+						<div>Type</div>
+						<div>URL</div>
+						<div>Data</div>
+						<aside>0 Requests</aside>
+					</ui-header>
+					<ui-data></ui-data>
+				</ui-list>
+			</section>
 			<section data-name="plugins">
 				plugins
 			</section>
+			<section data-name="persistence">
+				<ui-container>
+					<h2>Configuration</h2>
+					<ui-list id="config">
+						<ui-header style="grid-template-columns: 1fr 1fr;">
+							<div>Name</div>
+							<div>Value</div>
+						</ui-header>
+						<ui-data></ui-data>
+					</ui-list>
+				</ui-container>
+				<ui-container>
+					<h2>Users</h2>
+					<ui-list id="users">
+						<ui-header style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+							<div>Nickname</div>
+							<div>Device Token</div>
+							<div>Password</div>
+							<div>Last Login</div>
+						</ui-header>
+						<ui-data></ui-data>
+					</ui-list>
+				</ui-container>
+			</section>
 		</main>
-		<!--<footer></footer>-->
 		<script src="Script/UI.js"></script>
 	</body>
 </html>

@@ -34,6 +34,15 @@ export default class Plugin {
 		return packet;
 	}
 
+	/*
+	* @param {Request} request
+	* @returns {Request|null} null to stop handling the packet
+	*/
+	onRequest(request) {
+		/* Override Me */
+		return request;
+	}
+
 
 	/*
 	 * Will be called, when a chat-command (/<command> <args>) is executed by the client.
@@ -44,5 +53,24 @@ export default class Plugin {
 	onCommand(command, args) {
 		/* Override Me */
 		return false;
+	}
+
+	/* Do not modify here */
+	Enabled = false;
+
+	isEnabled() {
+		return this.Enabled;
+	}
+
+	enable() {
+		this.Enabled = true;
+
+		this.onInit();
+	}
+
+	disable() {
+		this.Enabled = false;
+
+		this.onDestroy();
 	}
 }

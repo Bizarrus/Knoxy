@@ -26,6 +26,24 @@ body {
     flex-direction: column;
 }
 
+/* Buttons */
+button {
+    border: none;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer !important;
+    background: rgba(255, 255, 255, 0.65);
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+button[data-active="true"] {
+    color: #FFFFFF;
+    background: rgba(0, 0, 90, 0.4);
+}
+
 /* Header */
 header {
     background: #2C3E50;
@@ -84,16 +102,23 @@ nav label:hover {
     background: #1a252f;
 }
 
+nav aside {
+    flex: 1 0 auto;
+    text-align: end;
+    align-content: center;
+}
+
 input[type="radio"] {
     display: none;
 }
 
 #logs:checked ~ nav label[for="logs"],
-#tree:checked ~ nav label[for="tree"],
-#plugins:checked ~ nav label[for="plugins"],
-
 #chatLogs:checked ~ section[data-name="logs"] nav label[for="chatLogs"],
-#cardLogs:checked ~ section[data-name="logs"] nav label[for="cardLogs"] {
+#cardLogs:checked ~ section[data-name="logs"] nav label[for="cardLogs"],
+#tree:checked ~ nav label[for="tree"],
+#requests:checked ~ nav label[for="requests"],
+#plugins:checked ~ nav label[for="plugins"],
+#persistence:checked ~ nav label[for="persistence"] {
     background: #FFFFFF;
     color: #444444;
 }
@@ -103,19 +128,33 @@ section {
     flex: 1;
     display: none;
     overflow-y: auto;
+    flex-direction: column;
 }
 
+section h2 {
+    align-items: center;
+    padding-top: 16px;
+    padding-bottom: 0;
+    padding-left: 10px;
+    justify-content: space-between;
+    font-size: 14px;
+    line-height: 18px;
+    color: rgba(0, 0, 0, 0.44);
+}
+
+#logs:checked ~ section[data-name="logs"],
 #chatLogs:checked ~ section[data-name="logs"] section[data-name="chatLogs"],
 #cardLogs:checked ~ section[data-name="logs"] section[data-name="cardLogs"],
-#logs:checked ~ section[data-name="logs"],
 #tree:checked ~ section[data-name="tree"],
-#plugins:checked ~ section[data-name="plugins"] {
+#requests:checked ~ section[data-name="requests"],
+#plugins:checked ~ section[data-name="plugins"],
+#persistence:checked ~ section[data-name="persistence"] {
     display: flex;
     flex-direction: column;
 }
 
 /* Logs */
-ui-logs {
+ui-list {
     position: relative;
     display: flex;
     flex: 1 1 auto;
@@ -124,12 +163,11 @@ ui-logs {
     flex-direction: column;
 }
 
-ui-logs ui-header {
+ui-list ui-header {
     display: grid;
     position: sticky;
     top: 0;
     z-index: 10;
-    grid-template-columns: 155px 210px 1fr 1fr;
     padding: 0.25rem 0;
     cursor: default;
     border-bottom: 1px solid #ccc;
@@ -138,71 +176,114 @@ ui-logs ui-header {
     font-weight: bold;
 }
 
-ui-logs ui-header > div {
+ui-list ui-header > div {
     padding-left: 7px;
 }
 
-ui-logs ui-header div:last-child {
+ui-list ui-header aside {
     text-align: right;
     font-weight: normal;
     padding-right: 7px;
     font-size: 0.8rem;
 }
 
-ui-logs ui-data {
+ui-list ui-data {
     flex: 1;
     display: block;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-ui-logs ui-data ui-entry {
+ui-list ui-data ui-entry {
     padding: 0.25rem 0;
+    position: relative;
     border-bottom: 1px solid #ccc;
     display: grid;
     font-size: 0.8rem;
     cursor: pointer !important;
-    grid-template-columns: 155px 210px 1fr;
 }
 
-ui-logs ui-data ui-entry * {
+ui-list ui-data ui-entry[data-show="false"] {
+    display: none;
+}
+
+ui-list ui-data ui-entry * {
     cursor: pointer !important;
 }
 
-ui-logs ui-data ui-entry[data-type="INPUT"] {
+ui-list ui-data ui-entry[data-type="INPUT"] {
     background-color: rgba(226, 255, 226, 0.65);
 }
 
-ui-logs ui-data ui-entry[data-type="OUTPUT"] {
+ui-list ui-data ui-entry[data-type="OUTPUT"] {
     background-color: rgba(255, 176, 176, 0.65);
 }
 
-ui-logs ui-data ui-entry:hover {
+ui-list ui-data ui-entry:hover {
     background-color: rgba(255, 184, 52, 0.65);
 }
 
-ui-logs ui-data ui-entry > div {
+ui-list ui-data ui-entry > div {
     padding-left: 7px;
 }
 
-ui-logs ui-data ui-entry > div small {
+ui-list ui-data ui-entry > div small {
     color: #B6B7AB;
 }
 
-ui-logs ui-data ui-entry div:first-child::before {
+ui-list ui-data ui-entry::before {
+    content: "";
+    display: inline-block;
+    font-family: bootstrap-icons;
+    position: absolute;
+    top: 5px;
+    left: 6px;
+}
+
+ui-list ui-data ui-entry[data-filter] {
+    padding-left: 18px;
+}
+
+ui-list ui-data ui-entry[data-filter="chat"]::before {
+    content: "\f267";
+    color: #419DFF;
+}
+
+ui-list ui-data ui-entry[data-filter="card"]::before {
+    content: "\f5a0";
+    color: #17B94A;
+}
+
+
+ui-list ui-data ui-entry div:first-child::before {
     content: "";
     font-family: bootstrap-icons;
     padding-right: 7px;
 }
 
-ui-logs ui-data ui-entry[data-type="INPUT"] div:first-child::before {
+ui-list ui-data ui-entry[data-type="INPUT"] div:first-child::before {
     content: "\F126";
     color: #005e00;
 }
 
-ui-logs ui-data ui-entry[data-type="OUTPUT"] div:first-child::before {
+ui-list ui-data ui-entry[data-type="OUTPUT"] div:first-child::before {
     content: "\F147";
     color: #9c0000;
+}
+
+/* List */
+ui-list {
+    flex: 1;
+    margin: 10px 10px;
+    border: 1px solid #CCCCCC;
+    border-radius: 5px;
+}
+
+/* Container */
+ui-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
 }
 
 /* Footer */

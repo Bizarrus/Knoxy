@@ -4,6 +4,7 @@
 import Network from 'node:net';
 import Crypto from 'node:crypto';
 import * as Events from 'node:events';
+import Request from './HTTP/Request.class.js';
 import Packet from './Protocol/Packet.class.js';
 import Huffman from './Protocol/Compressor/Huffman.class.js';
 import ChunkedInputStream from './Protocol/ChunkedInputStream.class.js';
@@ -20,13 +21,13 @@ export default class Proxy extends Events.EventEmitter {
 
 		this.Proxy = Network.createServer((Client) => {
 			const CLIENT_IDENTIFIER		= 0x00;
-			const CRYPTO_HEADER			= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
-			const Server				= new Network.Socket();
+			const CRYPTO_HEADER= Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]);
+			const Server			= new Network.Socket();
 			const ID					= Crypto.randomUUID();
-			const cStream				= new ChunkedInputStream();
-			const sStream				= new ChunkedInputStream();
-			let onlyTunnel				= false;
-			let sessionType				= parentServer ? 'Generic' : null; // added type Generic or CardServer
+			const cStream	= new ChunkedInputStream();
+			const sStream	= new ChunkedInputStream();
+			let onlyTunnel			= false;
+			let sessionType		= parentServer ? 'Generic' : null; // added type Generic or CardServer
 			let cryptoServer			= null;
 			let cryptoClient			= null;
 			let decodeKey				= null;
@@ -54,6 +55,7 @@ export default class Proxy extends Events.EventEmitter {
 
 			const sendPacket = (socket, crypto, packetString, encodeKey = null) => {
 				let packet = packetString;
+
 				if (this.Plugins) {
 					if (sessionType === 'Generic') {
 						packet = this.Plugins.onGeneric(packetString); // todo GenericProtocol.write | would it be more sensible to use plugins in main.js?
@@ -88,12 +90,8 @@ export default class Proxy extends Events.EventEmitter {
 			/* Incoming Data */
 			Client.on('data', (data) => {
 				// HTTP/S direkt durch
-				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] === 0x16 && (data[1] === 0x03)) {
-					const isHttps	= data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
-					onlyTunnel				= true;
-
-					this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Client', ID, data);
-					Server.write(data);
+				if(this.isHTTPRequest(Client, data)) {
+					onlyTunnel = true;
 					return;
 				}
 
@@ -164,12 +162,8 @@ export default class Proxy extends Events.EventEmitter {
 
 			Server.on('data', (data) => {
 				// HTTP/S direkt durch
-				if(onlyTunnel || data.toString('utf8').startsWith(Buffer.from('HTTP/')) || data.length >= 3 && data[0] === 0x16 && (data[1] === 0x03)) {
-					const isHttps	= data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04;
-					onlyTunnel				= true;
-
-					this.emit(isHttps ? 'HTTPS' : 'HTTP', 'Server', ID, data);
-					Client.write(data);
+				if(this.isHTTPRequest(Client, data)) {
+					onlyTunnel = true;
 					return;
 				}
 
@@ -263,5 +257,29 @@ export default class Proxy extends Events.EventEmitter {
 		}
 
 		return undefined;
+	}
+
+	isHTTPRequest(Client, data, onlyTunnel) {
+		// @ToDo wo kommen die Reuqests her, hier werden nur responses behandelt
+		let http 	= data.toString('utf8').startsWith(Buffer.from('HTTP/'));
+		let secured	= (data[0] === 0x16 && data[1] === 0x03 && data[2] >= 0x00 && data[2] <= 0x04);
+
+		if(onlyTunnel || http || secured) {
+			this.emit(secured ? 'HTTPS' : 'HTTP', 'Server', new Request(data));
+
+			if (this.Plugins) {
+				// @ToDo currently its to complex to return a request from a plugin, so we just check true/false for web-decline
+
+				// Plugin has filtered the packet, so we don't send it!
+				if(!this.Plugins.onRequest(new Request(data))) {
+					return true;
+				}
+			}
+
+			Client.write(data);
+			return true;
+		}
+
+		return false;
 	}
 }

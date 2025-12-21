@@ -24,3 +24,4 @@ b*/
 *.jar
 *.log
 *.part
+/Cache
