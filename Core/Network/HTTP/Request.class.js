@@ -1,16 +1,20 @@
+import Crypto from 'node:crypto';
+
 export default class Request {
-	Headers	= new Map();
-	Content			= null;
-	Method				= null;
-	Path				= null;
-	Protocol			= null;
-	Query		= new Map();
-	StatusCode			= null;
-	StatusMessage		= null;
-	IsResponse		= false;
+	Headers = new Map();
+	Content = null;
+	Method = null;
+	Path = null;
+	Protocol = null;
+	Query = new Map();
+	StatusCode = null;
+	StatusMessage = null;
+	IsResponse = false;
+	RequestId = null;
+	Timestamp = null;
 
 	// @ToDo bad name? Request can be also an Response, rename class to HTTPPacket(?)
-	constructor(data) {
+	constructor(data, requestId = null) {
 		if(!Buffer.isBuffer(data)) {
 			data = Buffer.from(data);
 		}
@@ -29,6 +33,18 @@ export default class Request {
 		}
 
 		this.parseHeaders(headerSection);
+
+		// Zeitstempel setzen
+		this.Timestamp = Date.now();
+
+		// Request-ID zuweisen
+		if (this.IsResponse) {
+			// Bei Response die übergebene Request-ID verwenden
+			this.RequestId = requestId;
+		} else {
+			// Bei Request neue ID generieren
+			this.RequestId = Crypto.randomUUID();
+		}
 	}
 
 	parseHeaders(headerSection) {
@@ -48,7 +64,7 @@ export default class Request {
 			this.StatusCode		= parts[1] ? parseInt(parts[1]) : null;
 			this.StatusMessage	= parts.slice(2).join(' ');
 
-		// HTTP Request: GET /path HTTP/1.1
+			// HTTP Request: GET /path HTTP/1.1
 		} else {
 			this.IsResponse		= false;
 			const [method, fullPath, protocol] = firstLine.split(' ');
@@ -144,5 +160,13 @@ export default class Request {
 
 	isResponse() {
 		return this.IsResponse;
+	}
+
+	getRequestId() {
+		return this.RequestId;
+	}
+
+	getTimestamp() {
+		return this.Timestamp;
 	}
 }

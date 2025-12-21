@@ -235,6 +235,11 @@ ui-list ui-data ui-entry:hover {
     background-color: rgba(255, 184, 52, 0.65);
 }
 
+ui-list ui-data ui-entry i {
+    display: inline-block;
+    padding: 0 10px;
+}
+
 ui-list ui-data ui-entry > div {
     padding-left: 7px;
 }

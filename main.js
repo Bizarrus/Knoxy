@@ -39,7 +39,7 @@ class Main {
 		this.Client			= new Client();
 		this.ChatProxy		= new Proxy(this.Configuration.Chat, { plugins: this.Plugins });
 		this.CardProxy		= new Proxy(this.Configuration.Card, { parentServer: this.ChatProxy });
-		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt'); // @ToDo where are these files?
+		this.ChatTree		= new GenericTree('./Data/GenericChatTree.txt');
 		this.CardTree		= new GenericTree('./Data/GenericCardTree.txt');
 		this.MainWindow		= new MainWindow();
 		this.LogWindow		= new LogWindow();
@@ -50,7 +50,6 @@ class Main {
 				this.MainWindow.send('persistence:users', this.Client.getPersistence().getUsers());
 			})
 
-			// @ToDo when UI was reloaded
 			ipcMain.on('refresh', (event, data) => {
 				this.MainWindow.send('persistence:config', this.Client.getPersistence().getConfig());
 				this.MainWindow.send('persistence:users', this.Client.getPersistence().getUsers());
@@ -64,7 +63,7 @@ class Main {
 						this.LogWindow.init(this.MainWindow).then(() => {
 							this.LogWindow.send('log', data);
 						});
-					break;
+						break;
 					case 'client':
 						let clientState = false;
 
@@ -76,7 +75,7 @@ class Main {
 									this.Client.open(this.Configuration.Chat.Proxy.Port);
 									clientState = true;
 								}
-							break;
+								break;
 							case 'start':
 								if(this.Client.isRunning()) {
 									webContents.send('dialog', 'Client is already running!');
@@ -85,7 +84,7 @@ class Main {
 
 								this.Client.open(this.Configuration.Chat.Proxy.Port);
 								clientState = true;
-							break;
+								break;
 							case 'stop':
 								if(!this.Client.isRunning()) {
 									webContents.send('dialog', 'Client is not running!');
@@ -93,27 +92,27 @@ class Main {
 								}
 
 								this.Client.close();
-							break;
+								break;
 						}
 
 						webContents.send('button', {
 							action:		'client:toggle',
 							state:		clientState
 						});
-					break;
+						break;
 					case 'proxy':
 						switch(value) {
 							case 'start':
 								// @ToDo Start the proxy
-							break;
+								break;
 							case 'stop':
 								// @ToDo Stop the proxy
-							break;
+								break;
 							case 'toggle':
 								// @ToDo Start/stop toggle proxy
-							break;
+								break;
 						}
-					break;
+						break;
 					case 'dev':
 						switch(value) {
 							case 'toggle':
@@ -122,18 +121,18 @@ class Main {
 								} else {
 									webContents.openDevTools();
 								}
-							break;
+								break;
 							case 'open':
 								webContents.openDevTools();
-							break;
+								break;
 							case 'close':
 								webContents.closeDevTools();
-							break;
+								break;
 						}
-					break;
+						break;
 					default:
 						console.warn('[Action] Unknown Action:', action, value, data);
-					break;
+						break;
 				}
 			});
 		});
@@ -224,7 +223,6 @@ class Main {
 						}
 					}
 				}
-			// catch exceptions, otherwise, the packet will be sent to the server.
 			} catch(error) {
 				console.error(error);
 			}
@@ -247,31 +245,83 @@ class Main {
 			console.error('[Error] on ' + type + ':', session, error);
 		});
 
-
+		// HTTP Request Handler
 		this.ChatProxy.on('HTTP_REQUEST', (type, request) => {
-			console.log('[HTTP] Request:', request.getMethod(), request.getPath());
+			// console.log('[HTTP] Request:', request.getRequestId(), request.getMethod(), request.getPath());
+
 			this.MainWindow.send('web:request', {
 				type: 'request',
 				secured: false,
-				request: request
+				requestId: request.getRequestId(),
+				timestamp: request.getTimestamp(),
+				method: request.getMethod(),
+				path: request.getPath(),
+				protocol: request.getProtocol(),
+				headers: Object.fromEntries(request.getHeaders()),
+				query: Object.fromEntries(request.getQueryParams()),
+				content: request.getContent()?.toString('utf8')
 			});
 		});
 
-		this.ChatProxy.on('HTTP_RESPONSE', (type, response) => {
-			console.log('[HTTP] Response:', response.getStatusCode());
+		// HTTP Response Handler (mit zugeordnetem Request)
+		this.ChatProxy.on('HTTP_RESPONSE', (type, response, originalRequest) => {
+			// console.log('[HTTP] Response:', response.getRequestId(), response.getStatusCode());
+
 			this.MainWindow.send('web:response', {
 				type: 'response',
 				secured: false,
-				response: response
+				requestId: response.getRequestId(),
+				timestamp: response.getTimestamp(),
+				statusCode: response.getStatusCode(),
+				statusMessage: response.getStatusMessage(),
+				protocol: response.getProtocol(),
+				headers: Object.fromEntries(response.getHeaders()),
+				content: response.getContent()?.toString('utf8'),
+				originalRequest: originalRequest ? {
+					method: originalRequest.getMethod(),
+					path: originalRequest.getPath(),
+					timestamp: originalRequest.getTimestamp(),
+					headers: Object.fromEntries(originalRequest.getHeaders())
+				} : null
 			});
 		});
 
-		this.ChatProxy.on('HTTPS_RESPONSE', (type, response) => {
-			console.log('[HTTPS] Response:', response.getStatusCode());
+		this.ChatProxy.on('HTTPS_REQUEST', (type, request) => {
+			//console.log('[HTTPS] Request:', request.getRequestId(), request.getMethod(), request.getPath());
+
+			this.MainWindow.send('web:request', {
+				type: 'request',
+				secured: true,
+				requestId: request.getRequestId(),
+				timestamp: request.getTimestamp(),
+				method: request.getMethod(),
+				path: request.getPath(),
+				protocol: request.getProtocol(),
+				headers: Object.fromEntries(request.getHeaders()),
+				query: Object.fromEntries(request.getQueryParams()),
+				content: request.getContent()?.toString('utf8')
+			});
+		});
+
+		this.ChatProxy.on('HTTPS_RESPONSE', (type, response, originalRequest) => {
+			// console.log('[HTTPS] Response:', response.getRequestId(), response.getStatusCode());
+
 			this.MainWindow.send('web:response', {
 				type: 'response',
 				secured: true,
-				response: response
+				requestId: response.getRequestId(),
+				timestamp: response.getTimestamp(),
+				statusCode: response.getStatusCode(),
+				statusMessage: response.getStatusMessage(),
+				protocol: response.getProtocol(),
+				headers: Object.fromEntries(response.getHeaders()),
+				content: response.getContent()?.toString('utf8'),
+				originalRequest: originalRequest ? {
+					method: originalRequest.getMethod(),
+					path: originalRequest.getPath(),
+					timestamp: originalRequest.getTimestamp(),
+					headers: Object.fromEntries(originalRequest.getHeaders())
+				} : null
 			});
 		});
 

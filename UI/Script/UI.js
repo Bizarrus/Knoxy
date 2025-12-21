@@ -4,7 +4,8 @@
 	Requests 		= null;
 	Config 		= null;
 	Users 			= null;
-	Count		=  {
+	PendingRequests	= new Map();
+	Count =  {
 		Packets:	0,
 		Requests:	0
 	};
@@ -151,36 +152,97 @@
 		console.log('Request', request);
 		document.querySelector(`section[data-name="requests"] ui-list ui-header aside`).innerText = `${++this.Count.Requests} Requests`;
 
+		const scrolling	= this.Requests.scrollTop + this.Requests.clientHeight + 20 >= this.Requests.scrollHeight;
 		const entry		= document.createElement('ui-entry');
+
+		entry.dataset.requestId = request.requestId;
+		entry.dataset.status = 'pending'; // Status: pending, completed, error
+
 		this.setGrid(this.Requests, entry);
 
-		//request.type == 'request'
-		//request.secured
-
-		/* Time */
-		this.addEntry(entry, this.getTimestamp());
+		/* Time / Duration */
+		const durationCell = document.createElement('i');
+		durationCell.innerHTML = '-';
+		durationCell.dataset.type = 'duration';
+		this.addEntry(entry, this.getTimestamp(request.timestamp), durationCell);
 
 		/* Method */
-		this.addEntry(entry, request.request.Method);
+		const methodColors = {
+			'GET': '#0066cc',
+			'POST': '#00aa00',
+			'PUT': '#ff8800',
+			'DELETE': '#cc0000',
+			'PATCH': '#8800cc'
+		};
+		const methodColor = methodColors[request.method] || '#666';
+		this.addEntry(entry, `<span style="color: ${methodColor}; font-weight: bold;">${request.method}</span>`);
 
-		/* Path */
-		this.addEntry(entry, request.request.Path);
+		/* Status / Path */
+		const statusCell = document.createElement('i');
+		statusCell.innerHTML = '<span style="color: #ff8800;">Pending...</span>';
+		statusCell.dataset.type = 'status';
+		const path = document.createElement('span');
+		path.innerHTML = request.path || '/';
+		this.addEntry(entry, statusCell, path);
 
-		/* Data */
-		this.addEntry(entry, request.request.Content);
+		this.PendingRequests.set(request.requestId, {
+			entry: entry,
+			request: request,
+			statusCell: statusCell,
+			durationCell: durationCell
+		});
 
-		// @ToDo Request is currently loading, adding load-Indicator & wait for onWebResponse
+
+		entry.addEventListener('dblclick', () => {
+			window.api.action('request', 'open', request.id);
+		});
 
 		this.Requests.append(entry);
+
+		/* Scrolling */
+		if(scrolling) {
+			requestAnimationFrame(() => {
+				this.Requests.scrollTop = this.Requests.scrollHeight;
+			});
+		}
 	}
 
-	onWebResponse(request) {
-		console.log('Response', request);
+	onWebResponse(responseData) {
+		console.log('Response', responseData);
 
-		//request.type == 'response'
-		//request.secured
+		const requestId = responseData.requestId;
+		const pending = this.PendingRequests.get(requestId);
 
-		// @ToDo add to the Request
+		if(!pending) {
+			console.warn('Response received for unknown request:', requestId);
+			return;
+		}
+
+		const { entry, request, statusCell, durationCell } = pending;
+
+		entry.dataset.status = 'completed';
+		const statusCode = responseData.statusCode;
+		let statusColor = '#00aa00';
+
+		if (statusCode >= 400 && statusCode < 500) {
+			statusColor = '#ff8800';
+		} else if (statusCode >= 500) {
+			statusColor = '#cc0000';
+		} else if (statusCode >= 300 && statusCode < 400) {
+			statusColor = '#0066cc';
+		}
+
+		statusCell.innerHTML = `<span style="color: ${statusColor}; font-weight: bold;">${statusCode} ${responseData.statusMessage || ''}</span>`;
+
+		if(request.timestamp && responseData.timestamp) {
+			const duration = responseData.timestamp - request.timestamp;
+			durationCell.innerHTML = `<span style="color: #666;">${duration}ms</span>`;
+		}
+
+		entry.dataset.hasResponse = 'true';
+		pending.response = responseData;
+
+		this.PendingRequests.delete(requestId);
 	}
 
 	onPersistenceConfig(config) {
@@ -224,9 +286,19 @@
 		}
 	}
 
-	addEntry(container, content) {
-		const element	= document.createElement('div');
-		element.innerHTML				= content;
+	addEntry(container, content, additional) {
+		const element = document.createElement('div');
+
+		if(content instanceof HTMLElement) {
+			element.append(content);
+		} else {
+			element.innerHTML = content;
+		}
+
+		if(additional) {
+			element.append(additional);
+		}
+
 		container.append(element);
 	}
 

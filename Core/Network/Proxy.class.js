@@ -33,6 +33,7 @@ export default class Proxy extends Events.EventEmitter {
 			let decodeKey				= null;
 			let clientHttpBuffer = Buffer.alloc(0);
 			let serverHttpBuffer = Buffer.alloc(0);
+			const pendingRequests = new Map();
 
 			/* Incoming Connection */
 			Server.connect(this.Configuration.Endpoint.Port, this.Configuration.Endpoint.Hostname, () => {
@@ -98,10 +99,19 @@ export default class Proxy extends Events.EventEmitter {
 					// Prüfen ob komplette HTTP-Message vorhanden
 					if(this.isCompleteHTTPMessage(clientHttpBuffer)) {
 						const request = new Request(clientHttpBuffer);
+						const requestId = request.getRequestId();
+						pendingRequests.set(requestId, {
+							request: request,
+							timestamp: Date.now(),
+							path: request.getPath(),
+							method: request.getMethod()
+						});
+
 						this.emit('HTTP_REQUEST', 'Client', request);
 
 						if (this.Plugins && !this.Plugins.onRequest(request)) {
 							clientHttpBuffer = Buffer.alloc(0);
+							pendingRequests.delete(requestId);
 							return;
 						}
 
@@ -187,10 +197,32 @@ export default class Proxy extends Events.EventEmitter {
 
 					// Prüfen ob komplette HTTP-Message vorhanden
 					if(this.isCompleteHTTPMessage(serverHttpBuffer)) {
-						const response = new Request(serverHttpBuffer);
-						this.emit(this.isHTTPS(data) ? 'HTTPS_RESPONSE' : 'HTTP_RESPONSE', 'Server', response);
+						let matchedRequestId = null;
+						let oldestTimestamp = Infinity;
 
-						if (this.Plugins && !this.Plugins.onRequest(response)) {
+						for (const [reqId, reqData] of pendingRequests.entries()) {
+							if (reqData.timestamp < oldestTimestamp) {
+								oldestTimestamp = reqData.timestamp;
+								matchedRequestId = reqId;
+							}
+						}
+
+						const response = new Request(serverHttpBuffer, matchedRequestId);
+						let matchedRequest = null;
+
+						if(matchedRequestId) {
+							matchedRequest = pendingRequests.get(matchedRequestId);
+							pendingRequests.delete(matchedRequestId);
+						}
+
+						this.emit(
+							this.isHTTPS(data) ? 'HTTPS_RESPONSE' : 'HTTP_RESPONSE',
+							'Server',
+							response,
+							matchedRequest ? matchedRequest.request : null
+						);
+
+						if(this.Plugins && !this.Plugins.onRequest(response)) {
 							serverHttpBuffer = Buffer.alloc(0);
 							return;
 						}
@@ -262,6 +294,9 @@ export default class Proxy extends Events.EventEmitter {
 				onlyTunnel		= false;
 				clientHttpBuffer = Buffer.alloc(0);
 				serverHttpBuffer = Buffer.alloc(0);
+
+				// Pending Requests clearen
+				pendingRequests.clear();
 
 				Client.destroy();
 				Server.destroy();
