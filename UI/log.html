@@ -1,48 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 	<head>
-		<title>Inspect</title>
-		<meta charset="utf-8">
-		<style>
-			body {
-				margin: 0;
-				background: #111;
-				color: #fff;
-				font: 14px monospace, sans-serif;
-				height: 100vh;
-				display: flex;
-				flex-direction: column;
-			}
-
-			header {
-				padding: 8px;
-				background: #222;
-				border-bottom: 1px solid #333;
-			}
-
-			pre {
-				flex: 1;
-				margin: 0;
-				padding: 8px;
-				overflow: auto;
-				white-space: pre-wrap;
-			}
-		</style>
+		<meta charset="UTF-8" />
+		<title>Knoxy</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="CSS/Icons.css" />
+		<link rel="stylesheet" href="CSS/Globals.css" />
 	</head>
 	<body>
-		<header>
-			<strong id="title">Log</strong>
-		</header>
-		<pre id="content"></pre>
-		<script>
-			const title		= document.getElementById('title');
-			const content	= document.getElementById('content');
+		<main>
+			<input type="radio" name="tabs" id="definition" />
+			<input type="radio" name="tabs" id="raw" checked />
+			<input type="radio" name="tabs" id="hex" />
 
-			window.api.onLog((data) => {
-				title.textContent	= `${data.typ} – ${data.definition?.Name ?? 'UNKNOWN'} ${data.generic ? `[${data.generic.Name}]` : ''}`;
-				document.title		= `Inspect - ` + title.textContent;
-				content.textContent = JSON.stringify(data, null, 2);
-			});
-		</script>
+			<nav>
+				<!--<label for="definition">Preview</label>-->
+				<label for="raw">RAW</label>
+				<!--<label for="hex">Hex</label>-->
+
+				<aside>
+					<button data-action="dev"><i class="bi bi-bug"></i> DevTools</button>
+				</aside>
+			</nav>
+
+			<section data-name="definition"></section>
+
+			<section data-name="raw">
+				<ui-scroll></ui-scroll>
+			</section>
+
+			<section data-name="hex"></section>
+		</main>
+		<script src="Script/Preview.js"></script>
 	</body>
 </html>

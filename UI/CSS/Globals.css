@@ -113,12 +113,13 @@ input[type="radio"] {
 }
 
 #logs:checked ~ nav label[for="logs"],
-#chatLogs:checked ~ section[data-name="logs"] nav label[for="chatLogs"],
-#cardLogs:checked ~ section[data-name="logs"] nav label[for="cardLogs"],
 #tree:checked ~ nav label[for="tree"],
 #requests:checked ~ nav label[for="requests"],
 #plugins:checked ~ nav label[for="plugins"],
-#persistence:checked ~ nav label[for="persistence"] {
+#persistence:checked ~ nav label[for="persistence"],
+#definition:checked ~ nav label[for="definition"],
+#raw:checked ~ nav label[for="raw"],
+#hex:checked ~ nav label[for="hex"] {
     background: #FFFFFF;
     color: #444444;
 }
@@ -143,12 +144,13 @@ section h2 {
 }
 
 #logs:checked ~ section[data-name="logs"],
-#chatLogs:checked ~ section[data-name="logs"] section[data-name="chatLogs"],
-#cardLogs:checked ~ section[data-name="logs"] section[data-name="cardLogs"],
 #tree:checked ~ section[data-name="tree"],
 #requests:checked ~ section[data-name="requests"],
 #plugins:checked ~ section[data-name="plugins"],
-#persistence:checked ~ section[data-name="persistence"] {
+#persistence:checked ~ section[data-name="persistence"],
+#definition:checked ~ section[data-name="definition"],
+#raw:checked ~ section[data-name="raw"],
+#hex:checked ~ section[data-name="hex"] {
     display: flex;
     flex-direction: column;
 }
@@ -284,6 +286,19 @@ ui-container {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+}
+
+ui-char {
+    background: #e7e7e7;
+    font-size: 12px;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+ui-scroll {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 20px;
 }
 
 /* Footer */
