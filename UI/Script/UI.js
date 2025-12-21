@@ -17,6 +17,7 @@
 
 		[
 			'onDialog',
+			'onButtonChange',
 			'onLog',
 			'onWebRequest',
 			'onPersistenceConfig',
@@ -211,5 +212,13 @@
 
 	onDialog(text) {
 		alert(text);
+	}
+
+	onButtonChange(data) {
+		let element = document.querySelector(`button[data-action="${data.action}"]`);
+
+		if(element) {
+			element.dataset.active = data.state;
+		}
 	}
 }());

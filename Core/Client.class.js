@@ -65,6 +65,8 @@ export default class Client {
 	close() {
 		if(this.isRunning()) {
 			this.Process.kill();
+
+			this.Process = null;
 		}
 	}
 

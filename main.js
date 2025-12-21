@@ -66,7 +66,17 @@ class Main {
 						});
 					break;
 					case 'client':
+						let clientState = false;
+
 						switch(value) {
+							case 'toggle':
+								if(this.Client.isRunning()) {
+									this.Client.close();
+								} else {
+									this.Client.open(this.Configuration.Chat.Proxy.Port);
+									clientState = true;
+								}
+							break;
 							case 'start':
 								if(this.Client.isRunning()) {
 									webContents.send('dialog', 'Client is already running!');
@@ -74,6 +84,7 @@ class Main {
 								}
 
 								this.Client.open(this.Configuration.Chat.Proxy.Port);
+								clientState = true;
 							break;
 							case 'stop':
 								if(!this.Client.isRunning()) {
@@ -84,6 +95,11 @@ class Main {
 								this.Client.close();
 							break;
 						}
+
+						webContents.send('button', {
+							action:		'client:toggle',
+							state:		clientState
+						});
 					break;
 					case 'proxy':
 						switch(value) {
