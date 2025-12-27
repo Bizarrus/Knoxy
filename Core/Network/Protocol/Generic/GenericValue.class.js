@@ -27,7 +27,7 @@ export default class GenericValue {
 						return value.toJSON();
 					}
 
-					return v;
+					return value;
 				})
 			};
 		}
