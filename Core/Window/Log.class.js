@@ -7,8 +7,8 @@ export default class LogWindow {
 
 	init(parent) {
 		this.Window = new BrowserWindow({
-			width:				800,
-			height:				600,
+			width:				550,
+			height:				500,
 			icon:				Path.join(Process.cwd(), 'UI', 'Assets', 'Icon.png'),
 			autoHideMenuBar:	true,
 			webPreferences: {
