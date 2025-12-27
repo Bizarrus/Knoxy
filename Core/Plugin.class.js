@@ -20,7 +20,7 @@ export default class Plugin {
 	* @param {Packet} packet
 	* @returns {Packet|null} null to stop handling the packet
 	*/
-	onPacket(packet) {
+	onPacket(packet, definition) {
 		/* Override Me */
 		return packet;
 	}

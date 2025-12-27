@@ -32,53 +32,61 @@ export default class DownloadImages extends Plugin {
 	}
 
 	onResponse(id, response) {
-		if (response.hasHeader('Content-Type')) {
-			let contentType		= response.getHeader('Content-Type');
-			let extension	= null;
-
-			if(contentType.indexOf('/') !== -1) {
-				const [type, ext] = contentType.split('/', 2);
-
-				if(type === 'image') {
-					extension = ext;
-				} else {
-					console.warn('Unknown Image Type:', type);
-					return true;
-				}
-			}
-
-			if(!response.Content || response.Content.length === 0) {
+		try {
+			if(response === null) {
 				return true;
 			}
 
-			let relativePath	= '';
-			let filename		= `${id}.${extension}`;
+			if(response.hasHeader('Content-Type')) {
+				let contentType = response.getHeader('Content-Type');
+				let extension = null;
 
-			if(this.Requests[id] && this.Requests[id].path) {
-				relativePath = this.Requests[id].path;
+				if(contentType.indexOf('/') !== -1) {
+					const [ type, ext ] = contentType.split('/', 2);
 
-				if(relativePath.startsWith('/')) {
-					relativePath = relativePath.substring(1);
+					if(type === 'image') {
+						extension = ext;
+					} else {
+						console.warn('Unknown Image Type:', type);
+						return true;
+					}
 				}
 
-				filename = relativePath;
-			}
+				if(!response.Content || response.Content.length === 0) {
+					return true;
+				}
 
-			const filepath	= Path.join(this.Destination, filename);
-			const directory	= Path.dirname(filepath);
+				let relativePath = '';
+				let filename = `${id}.${extension}`;
 
-			if(!FileSystem.existsSync(directory)) {
-				FileSystem.mkdirSync(directory, { recursive: true });
-			}
+				if(this.Requests[id] && this.Requests[id].path) {
+					relativePath = this.Requests[id].path;
 
-			try {
-				FileSystem.writeFileSync(filepath, response.Content);
-				delete this.Requests[id];
-			} catch (error) {
-				console.error(error);
+					if(relativePath.startsWith('/')) {
+						relativePath = relativePath.substring(1);
+					}
+
+					filename = relativePath;
+				}
+
+				const filepath = Path.join(this.Destination, filename);
+				const directory = Path.dirname(filepath);
+
+				if(!FileSystem.existsSync(directory)) {
+					FileSystem.mkdirSync(directory, { recursive: true });
+				}
+
+				try {
+					FileSystem.writeFileSync(filepath, response.Content);
+					delete this.Requests[id];
+				} catch(error) {
+					console.error(error);
+				}
 			}
+		} catch(error) {
+			console.error(error);
+			console.error(id, response);
 		}
-
 		return true;
 	}
 }

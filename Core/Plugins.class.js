@@ -60,11 +60,10 @@ export default class Plugins {
 		}
 	}
 
-	onPacket(packet) {
+	onPacket(packet, definition) {
 		for(const [name, plugin] of this.Plugins) {
 			if(plugin.isEnabled() && typeof(plugin.onPacket) === 'function') {
-				// ToDo adding definition for better handling of packets?
-				packet = plugin.onPacket(packet);
+				packet = plugin.onPacket(packet, definition);
 			}
 		}
 
@@ -84,7 +83,9 @@ export default class Plugins {
 	onRequest(id, data) {
 		for(const [name, plugin] of this.Plugins) {
 			if(plugin.isEnabled() && typeof(plugin.onRequest) === 'function') {
-				data = plugin.onRequest(id, data);
+				if(!plugin.onRequest(id, data)) {
+					return null;
+				}
 			}
 		}
 
@@ -94,7 +95,9 @@ export default class Plugins {
 	onResponse(id, data) {
 		for(const [name, plugin] of this.Plugins) {
 			if(plugin.isEnabled() && typeof(plugin.onResponse) === 'function') {
-				data = plugin.onResponse(id, data);
+				if(!plugin.onResponse(id, data)) {
+					return null;
+				}
 			}
 		}
 

@@ -60,7 +60,7 @@ export default class  extends Plugin {
 	
 	}
 
-	onPacket(packet) {
+	onPacket(packet, definition) {
 		/*
 		    Here you can modify/inspect the packet.
 		    If you return "null" the packet will be ignored.    

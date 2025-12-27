@@ -9,6 +9,7 @@ import Packet from './Protocol/Packet.class.js';
 import Huffman from './Protocol/Compressor/Huffman.class.js';
 import ChunkedInputStream from './Protocol/ChunkedInputStream.class.js';
 import CryptoSession from './Crypto/CryptoSession.class.js';
+import Definitions from './Protocol/Definitions.class.js';
 
 export default class Proxy extends Events.EventEmitter {
 	Plugins = null;
@@ -56,14 +57,18 @@ export default class Proxy extends Events.EventEmitter {
 				return null;
 			};
 
-			const sendPacket = (socket, crypto, packetString, encodeKey = null) => {
+			const sendPacket = (type, socket, crypto, packetString, encodeKey = null) => {
 				let packet = packetString;
 
 				if (this.Plugins) {
+					let parts		= packet.split('\0');
+					let opcode		= parts[0];
+					let definition	= Definitions.resolve(type, opcode, parts, packet);
+
 					if (sessionType === 'Generic') {
-						packet = this.Plugins.onGeneric(packetString); // todo GenericProtocol.write | would it be more sensible to use plugins in main.js?
+						packet = this.Plugins.onGeneric(packetString, definition); // todo GenericProtocol.write | would it be more sensible to use plugins in main.js?
 					} else {
-						packet = this.Plugins.onPacket(packetString);
+						packet = this.Plugins.onPacket(packetString, definition);
 					}
 				}
 
@@ -183,7 +188,7 @@ export default class Proxy extends Events.EventEmitter {
 						const packet = sessionType === 'Generic' ? bundle : handleHuffman(bundle, 'Client', null);
 
 						this.returnEmit('packet', ID, 'Client', packet);
-						sendPacket(Server, cryptoServer, packet, null);
+						sendPacket('Output', Server, cryptoServer, packet, null);
 					} catch(e) {
 						this.emit('exception', ID, 'Client', e);
 					}
@@ -271,7 +276,7 @@ export default class Proxy extends Events.EventEmitter {
 						const packet = sessionType === 'Generic' ? bundle : handleHuffman(bundle, 'Server', decodeKey);
 
 						this.returnEmit('packet', ID, 'Server', packet);
-						sendPacket(Client, cryptoClient, packet, decodeKey);
+						sendPacket('Input', Client, cryptoClient, packet, decodeKey);
 
 						if (typeof packet === 'string') { // precess only Huffman pakets
 							const tokens = packet.split('\0');
