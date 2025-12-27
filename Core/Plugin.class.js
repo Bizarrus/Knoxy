@@ -38,7 +38,16 @@ export default class Plugin {
 	* @param {Request} request
 	* @returns {Request|null} null to stop handling the packet
 	*/
-	onRequest(request) {
+	onRequest(id, request) {
+		/* Override Me */
+		return true;
+	}
+
+	/*
+	* @param {Response} response
+	* @returns {Response|null} null to stop handling the packet
+	*/
+	onResponse(id, response) {
 		/* Override Me */
 		return true;
 	}

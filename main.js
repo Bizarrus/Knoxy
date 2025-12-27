@@ -178,8 +178,8 @@ class Main {
 				generic:	generic ? generic.toJSON() : undefined
 			});
 
-			console.log(typ, buffer);
-			console.log(generic.toJSON());
+			//console.log(typ, buffer);
+			//console.log(generic.toJSON());
 			return buffer;
 		});
 
@@ -194,7 +194,7 @@ class Main {
 			let definition	= Definitions.resolve((typ === 'Server' ? 'Input' : 'Output'), opcode, parts, packet);
 
 			if(definition === null) {
-				console.log(Chalk.hex('#FF0000')(opcode), packet.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
+				/*console.log(Chalk.hex('#FF0000')(opcode), packet.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
 					let hex = char.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase();
 
 					if(hex === '00') {
@@ -202,12 +202,12 @@ class Main {
 					}
 
 					return Chalk.hex('#FF9000')(`[${hex}=${char.charCodeAt(0)}]`);
-				}));
+				}));*/
 				return true;
 			}
 
 			// CLI-Mode
-			console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
+			//console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(definition.toString()));
 
 			let generic	= null;
 			let genericChatTree = this.ChatTree.get();
@@ -217,20 +217,20 @@ class Main {
 					if(genericChatTree !== null) {
 						generic = genericChatTree.read(packet, 2);
 
-						console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), {
+						/*console.log(Chalk.hex('#3399FF')('[' + typ + ']'), Chalk.bgHex(color_swap ? '#C0C0C0' : '#808080').hex('#800080')(util.inspect(generic.toJSON(), {
 							colors: true,
 							depth: null,
 							compact: false
-						})));
+						})));*/
 
 						this.ChatTree.handleUpdate(genericChatTree, generic);
 
 						const p = opcode + '\0' + genericChatTree.write(generic);
 
 						if(p !== packet) {
-							console.log('FAIL   ', generic.getName());
+							/*console.log('FAIL   ', generic.getName());
 							console.log('       ', Buffer.from(packet).toString('hex'));
-							console.log('       ', Buffer.from(p).toString('hex'));
+							console.log('       ', Buffer.from(p).toString('hex'));*/
 						}
 					}
 				}
@@ -261,16 +261,16 @@ class Main {
 			// console.log('[HTTP] Request:', request.getRequestId(), request.getMethod(), request.getPath());
 
 			this.MainWindow.send('web:request', {
-				type: 'request',
-				secured: false,
-				requestId: request.getRequestId(),
-				timestamp: request.getTimestamp(),
-				method: request.getMethod(),
-				path: request.getPath(),
-				protocol: request.getProtocol(),
-				headers: Object.fromEntries(request.getHeaders()),
-				query: Object.fromEntries(request.getQueryParams()),
-				content: request.getContent()?.toString('utf8')
+				type:			'request',
+				secured:		false,
+				requestId:		request.getRequestId(),
+				timestamp:		request.getTimestamp(),
+				method:			request.getMethod(),
+				path:			request.getPath(),
+				protocol:		request.getProtocol(),
+				headers:		Object.fromEntries(request.getHeaders()),
+				query:			Object.fromEntries(request.getQueryParams()),
+				content:		request.getContent()?.toString('utf8')
 			});
 		});
 
@@ -279,20 +279,20 @@ class Main {
 			// console.log('[HTTP] Response:', response.getRequestId(), response.getStatusCode());
 
 			this.MainWindow.send('web:response', {
-				type: 'response',
-				secured: false,
-				requestId: response.getRequestId(),
-				timestamp: response.getTimestamp(),
-				statusCode: response.getStatusCode(),
-				statusMessage: response.getStatusMessage(),
-				protocol: response.getProtocol(),
-				headers: Object.fromEntries(response.getHeaders()),
-				content: response.getContent()?.toString('utf8'),
-				originalRequest: originalRequest ? {
-					method: originalRequest.getMethod(),
-					path: originalRequest.getPath(),
-					timestamp: originalRequest.getTimestamp(),
-					headers: Object.fromEntries(originalRequest.getHeaders())
+				type:				'response',
+				secured:			false,
+				requestId:			response.getRequestId(),
+				timestamp:			response.getTimestamp(),
+				statusCode:			response.getStatusCode(),
+				statusMessage:		response.getStatusMessage(),
+				protocol:			response.getProtocol(),
+				headers:			Object.fromEntries(response.getHeaders()),
+				content:			response.getContent()?.toString('utf8'),
+				originalRequest:	originalRequest ? {
+					method:		originalRequest.getMethod(),
+					path:		originalRequest.getPath(),
+					timestamp:	originalRequest.getTimestamp(),
+					headers:	Object.fromEntries(originalRequest.getHeaders())
 				} : null
 			});
 		});
@@ -301,16 +301,16 @@ class Main {
 			//console.log('[HTTPS] Request:', request.getRequestId(), request.getMethod(), request.getPath());
 
 			this.MainWindow.send('web:request', {
-				type: 'request',
-				secured: true,
-				requestId: request.getRequestId(),
-				timestamp: request.getTimestamp(),
-				method: request.getMethod(),
-				path: request.getPath(),
-				protocol: request.getProtocol(),
-				headers: Object.fromEntries(request.getHeaders()),
-				query: Object.fromEntries(request.getQueryParams()),
-				content: request.getContent()?.toString('utf8')
+				type: 			'request',
+				secured:		true,
+				requestId:		request.getRequestId(),
+				timestamp:		request.getTimestamp(),
+				method:			request.getMethod(),
+				path:			request.getPath(),
+				protocol:		request.getProtocol(),
+				headers:		Object.fromEntries(request.getHeaders()),
+				query:			Object.fromEntries(request.getQueryParams()),
+				content:		request.getContent()?.toString('utf8')
 			});
 		});
 
@@ -318,20 +318,20 @@ class Main {
 			// console.log('[HTTPS] Response:', response.getRequestId(), response.getStatusCode());
 
 			this.MainWindow.send('web:response', {
-				type: 'response',
-				secured: true,
-				requestId: response.getRequestId(),
-				timestamp: response.getTimestamp(),
-				statusCode: response.getStatusCode(),
-				statusMessage: response.getStatusMessage(),
-				protocol: response.getProtocol(),
-				headers: Object.fromEntries(response.getHeaders()),
-				content: response.getContent()?.toString('utf8'),
-				originalRequest: originalRequest ? {
-					method: originalRequest.getMethod(),
-					path: originalRequest.getPath(),
-					timestamp: originalRequest.getTimestamp(),
-					headers: Object.fromEntries(originalRequest.getHeaders())
+				type:			'response',
+				secured:		true,
+				requestId:			response.getRequestId(),
+				timestamp: 			response.getTimestamp(),
+				statusCode:			response.getStatusCode(),
+				statusMessage:		response.getStatusMessage(),
+				protocol:			response.getProtocol(),
+				headers:			Object.fromEntries(response.getHeaders()),
+				content:			response.getContent()?.toString('utf8'),
+				originalRequest:	originalRequest ? {
+					method:		originalRequest.getMethod(),
+					path:		originalRequest.getPath(),
+					timestamp:	originalRequest.getTimestamp(),
+					headers:	Object.fromEntries(originalRequest.getHeaders())
 				} : null
 			});
 		});

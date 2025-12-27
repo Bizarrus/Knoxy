@@ -4,14 +4,13 @@
 import Plugin from '../Core/Plugin.class.js';
 import FileSystem from 'node:fs';
 import Path from 'node:path';
-import Crypto from 'node:crypto';
 
 export default class DownloadImages extends Plugin {
-	Destination = './Cache/Images/';
+	Destination	= './Cache/Images/';
+	Requests		= {};
 
 	constructor() {
 		super();
-
 		this.enable();
 	}
 
@@ -21,35 +20,62 @@ export default class DownloadImages extends Plugin {
 		}
 	}
 
-	onRequest(request) {
-		console.log('Request', request);
+	onRequest(id, request) {
+		if(request.Path && request.Path.match(/\.(gif|jpg|jpeg|png|webp|bmp|svg)$/i)) {
+			this.Requests[id] = {
+				path:		request.Path,
+				timestamp:	request.Timestamp
+			};
+		}
 
-		if(request.hasHeader('Content-Type')) {
-			let extension = null;
+		return true;
+	}
 
-			switch(request.getHeader('Content-Type')) {
-				case 'image/png':
-					extension = 'png';
-				break;
-				case 'image/jpg':
-					extension = 'jpg';
-				break;
-				case 'image/jpeg':
-					extension = 'jpeg';
-				break;
-				case 'image/gif':
-					extension = 'gif';
-				break;
-				default:
-					console.warn('Unknown Image Type:', request);
-				break;
+	onResponse(id, response) {
+		if (response.hasHeader('Content-Type')) {
+			let contentType		= response.getHeader('Content-Type');
+			let extension	= null;
+
+			if(contentType.indexOf('/') !== -1) {
+				const [type, ext] = contentType.split('/', 2);
+
+				if(type === 'image') {
+					extension = ext;
+				} else {
+					console.warn('Unknown Image Type:', type);
+					return true;
+				}
 			}
 
-			if(extension !== null) {
-				const content		= request.getContent();
-				const hash	= Crypto.createHash('md5').update(content).digest('hex');
+			if(!response.Content || response.Content.length === 0) {
+				return true;
+			}
 
-				FileSystem.writeFileSync(Path.join(this.Destination, `${hash}.${extension}`), content);
+			let relativePath	= '';
+			let filename		= `${id}.${extension}`;
+
+			if(this.Requests[id] && this.Requests[id].path) {
+				relativePath = this.Requests[id].path;
+
+				if(relativePath.startsWith('/')) {
+					relativePath = relativePath.substring(1);
+				}
+
+				filename = relativePath;
+			}
+
+			const filepath	= Path.join(this.Destination, filename);
+			const directory	= Path.dirname(filepath);
+
+			if(!FileSystem.existsSync(directory)) {
+				FileSystem.mkdirSync(directory, { recursive: true });
+			}
+
+			try {
+				FileSystem.writeFileSync(filepath, response.Content);
+				delete this.Requests[id];
+			} catch (error) {
+				console.error(error);
 			}
 		}
 

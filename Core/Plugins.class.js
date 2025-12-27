@@ -81,10 +81,20 @@ export default class Plugins {
 		return packet;
 	}
 
-	onRequest(data) {
+	onRequest(id, data) {
 		for(const [name, plugin] of this.Plugins) {
 			if(plugin.isEnabled() && typeof(plugin.onRequest) === 'function') {
-				data = plugin.onRequest(data);
+				data = plugin.onRequest(id, data);
+			}
+		}
+
+		return data;
+	}
+
+	onResponse(id, data) {
+		for(const [name, plugin] of this.Plugins) {
+			if(plugin.isEnabled() && typeof(plugin.onResponse) === 'function') {
+				data = plugin.onResponse(id, data);
 			}
 		}
 

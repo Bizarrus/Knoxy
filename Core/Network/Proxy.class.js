@@ -100,16 +100,17 @@ export default class Proxy extends Events.EventEmitter {
 					if(this.isCompleteHTTPMessage(clientHttpBuffer)) {
 						const request = new Request(clientHttpBuffer);
 						const requestId = request.getRequestId();
+
 						pendingRequests.set(requestId, {
-							request: request,
-							timestamp: Date.now(),
-							path: request.getPath(),
-							method: request.getMethod()
+							request:	request,
+							timestamp:	Date.now(),
+							path:		request.getPath(),
+							method:		request.getMethod()
 						});
 
 						this.emit('HTTP_REQUEST', 'Client', request);
 
-						if (this.Plugins && !this.Plugins.onRequest(request)) {
+						if(this.Plugins && !this.Plugins.onRequest(requestId, request)) {
 							clientHttpBuffer = Buffer.alloc(0);
 							pendingRequests.delete(requestId);
 							return;
@@ -145,7 +146,6 @@ export default class Proxy extends Events.EventEmitter {
 
 							Server.write(Buffer.concat([
 								Buffer.from([ CLIENT_IDENTIFIER ]),
-
 								Packet.encode(proxyPubKey, Buffer.from([ 0xFE, 0x53, 0xEF, 0x17 ]))
 							]));
 
@@ -222,7 +222,7 @@ export default class Proxy extends Events.EventEmitter {
 							matchedRequest ? matchedRequest.request : null
 						);
 
-						if(this.Plugins && !this.Plugins.onRequest(response)) {
+						if(this.Plugins && !this.Plugins.onResponse(matchedRequestId, response)) {
 							serverHttpBuffer = Buffer.alloc(0);
 							return;
 						}

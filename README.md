@@ -78,11 +78,19 @@ export default class  extends Plugin {
 		return packet;
 	}
 
-	onRequest(request) {
+	onRequest(id, request) {
 		/*
 			All HTTP(s)-Requests will be hooked into this method.
 		    If you return "false" the request will be ignored. Good for blocking tracking/advertising requests.
 		*/
+		return true;
+	}
+
+	onResponse(id, response) {
+		/*
+		 All HTTP(s)-Responses will be hooked into this method.
+		 If you return "false" the request will be ignored. Good for blocking tracking/advertising requests.
+		 */
 		return true;
 	}
 
