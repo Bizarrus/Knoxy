@@ -155,7 +155,7 @@
 		document.querySelector(`section[data-name="requests"] ui-list ui-header aside`).innerText = `${++this.Count.Requests} Requests`;
 
 		const scrolling	= this.Requests.scrollTop + this.Requests.clientHeight + 20 >= this.Requests.scrollHeight;
-		const entry		= document.createElement('ui-entry');
+		const entry= document.createElement('ui-entry');
 
 		entry.dataset.requestId = request.requestId;
 		entry.dataset.status = 'pending'; // Status: pending, completed, error
@@ -193,7 +193,6 @@
 			statusCell: statusCell,
 			durationCell: durationCell
 		});
-
 
 		entry.addEventListener('dblclick', () => {
 			window.api.action('request', 'open', request.id);

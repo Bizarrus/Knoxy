@@ -9,12 +9,12 @@
 	</head>
 	<body>
 		<main>
-			<input type="radio" name="tabs" id="definition" />
-			<input type="radio" name="tabs" id="raw" checked />
+			<input type="radio" name="tabs" id="definition" checked />
+			<input type="radio" name="tabs" id="raw" />
 			<input type="radio" name="tabs" id="hex" />
 
 			<nav>
-				<!--<label for="definition">Preview</label>-->
+				<label for="definition">Preview</label>
 				<label for="raw">RAW</label>
 				<!--<label for="hex">Hex</label>-->
 
@@ -25,7 +25,31 @@
 				</aside>
 			</nav>
 
-			<section data-name="definition"></section>
+			<section data-name="definition">
+				<ui-container>
+					<h2>Informations</h2>
+					<ui-list id="info">
+						<ui-header style="grid-template-columns: 1fr 5fr;">
+							<div>Name</div>
+							<div>Value</div>
+						</ui-header>
+						<ui-data></ui-data>
+					</ui-list>
+				</ui-container>
+				<ui-container>
+					<h2>Data</h2>
+					<ui-list id="data">
+						<ui-header style="grid-template-columns: 50px 100px 100px 1fr 2fr;">
+							<div>Index</div>
+							<div>Type</div>
+							<div>Name</div>
+							<div>Value</div>
+							<div>Description</div>
+						</ui-header>
+						<ui-data></ui-data>
+					</ui-list>
+				</ui-container>
+			</section>
 
 			<section data-name="raw">
 				<ui-scroll></ui-scroll>
