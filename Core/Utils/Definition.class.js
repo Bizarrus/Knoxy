@@ -5,12 +5,14 @@ export default class Definition {
 	Name		= null;
 	Opcode		= null;
 	Parameters	= null;
+	Description= null;
 	Data		= null;
 
 	constructor(name, json) {
-		this.Name		= name;
-		this.Opcode		= json.opcode;
-		this.Parameters = json.parameters;
+		this.Name			= name;
+		this.Opcode			= json.opcode;
+		this.Parameters		= json.parameters;
+		this.Description	= json.description;
 	}
 
 	getName() {
@@ -19,6 +21,10 @@ export default class Definition {
 
 	getParameters() {
 		return this.Parameters;
+	}
+
+	getDescription() {
+		return this.Description;
 	}
 
 	fill(data) {
