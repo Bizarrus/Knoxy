@@ -8,8 +8,18 @@ Knuddels Proxy only in JavaScript with integrated inspectors and plugin manageme
 - Bypasses the (fake) security mechanism with their fake end-to-end decryption (defined by themselves as “our highest security standards”).
 - Plugin-System to hook into network packets
 - Packet inspector
+- Java + Client-Version selector
+- HTTP(s)-Request inspector
+- Persistence inspector (internal database)
 
-![](Screenshots/Preview.png?v2)
+#### Plugin-Features
+- [ ] Blocking tracking/advertising requests
+- [ ] Remove Client-Blocking (if your account was banned)
+- [ ] Image downloader
+- [ ] Inject own data/commands into chat
+- [ ] Fake private chats/rooms for screenshots
+
+![](Screenshots/Preview.png?v3)
 
 # Installation
 > npm install
