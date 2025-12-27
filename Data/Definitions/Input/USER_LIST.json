@@ -1,5 +1,6 @@
 {
 	"opcode":		"u",
+	"deprecated":	true,
 	"description":	"deprecated",
 	"parameters":	[
 		{

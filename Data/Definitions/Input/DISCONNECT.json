@@ -1,14 +1,16 @@
 {
 	"opcode":		"d",
-	"description":	"",
+	"description":	"Wenn der Client vom Server getrennt wird, wird dieser Opcode gesendet.",
 	"parameters":	[
 		{
-			"name": "ChannelFrom",
-			"type": "String"
+			"name":			"ChannelFrom",
+			"type":			"String",
+			"description":	"Von welchem Channel der Client getrennt wurde."
 		},
 		{
-			"name": "ChannelTo",
-			"type": "String"
+			"name":			"ChannelTo",
+			"type":			"String",
+			"description":	"Zu welchen Channel der Client gewechselt ist (Optional)."
 		}
 	]
 }

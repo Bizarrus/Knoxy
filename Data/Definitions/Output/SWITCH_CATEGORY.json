@@ -4,19 +4,23 @@
 	"parameters":	[
 		{
 			"name": "Category",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "SubCategory",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "Nickname",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Password-Hash",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }

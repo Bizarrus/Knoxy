@@ -1,22 +1,26 @@
 {
 	"opcode":		"(",
-	"description":	"Connection-Initialization",
+	"description":	"Initialisiert die Verbindung, eine Rückmeldung, dass die Verbindung hergestellt wurde.",
 	"parameters":	[
 		{
-			"name": "PasswordKey",
-			"type": "String"
+			"name":			"Password Key",
+			"type":			"String",
+			"description":	"Dieser Key wird zum hashen des Passworts verwendet."
 		},
 		{
-			"name": "Suggestion",
-			"type": "String"
+			"name":			"Suggestion",
+			"type":			"String",
+			"description":	"Der vorgeschlagene Channel, der initial nach dem verbinden angezeigt wird."
 		},
 		{
-			"name": "Decode-Key",
-			"type": "String"
+			"name":			"Decode-Key",
+			"type":			"String",
+			"description":	"Dieser Fake-Key wird für das XOR'ing der Daten verwendet (hat sich seit jahrzehnten nicht geändert und ist bisher immer \"K\" gewesen."
 		},
 		{
-			"name": "DH-Key",
-			"type": "String"
+			"name":			"DH-Key",
+			"type":			"String",
+			"description":	"Diffie-Hellman Key um eine Fake Client-zu-Client-Verschlüsselung zu nutzen, die natürlich Serverseitig dennoch wieder aufgebrochen wird."
 		}
 	]
 }

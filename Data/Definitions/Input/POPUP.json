@@ -1,6 +1,6 @@
 {
 	"opcode":		"k",
-	"description":	"",
+	"description":	"Wenn ein Fenster angezeigt werden soll. Enthält Binärdaten, die verschiedene Java-Elemente zusammenbastelt.",
 	"parameters":	{
 		"name": "Buffer",
 		"type": "Popup"

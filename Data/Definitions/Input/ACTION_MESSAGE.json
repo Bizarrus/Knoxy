@@ -1,18 +1,21 @@
 {
 	"opcode":		"t",
-	"description":	"",
+	"description":	"Wenn im Channel eine Action-Message gesendet wird.",
 	"parameters":	[
 		{
-			"name": "Sender",
-			"type": "String"
+			"name":			"Sender",
+			"type": 		"String",
+			"description":	"Der Nickname, zu dem die Action-Message gehört."
 		},
 		{
-			"name": "Channel",
-			"type": "String"
+			"name": 		"Channel",
+			"type": 		"String",
+			"description":	"Der Channel, in dem die Action-Message gesendet wurde."
 		},
 		{
-			"name": "Message",
-			"type": "String"
+			"name":			"Message",
+			"type":			"String",
+			"description":	"Der Nachrichteninhalt der Action-Message."
 		}
 	]
 }

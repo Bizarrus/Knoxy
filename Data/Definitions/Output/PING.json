@@ -4,7 +4,8 @@
 	"parameters":	[
 		{
 			"name": "Receiver",
-			"type": "-|Nickname:UnixTimestamp"
+			"type": "-|Nickname:UnixTimestamp",
+			"description":	""
 		}
 	]
 }

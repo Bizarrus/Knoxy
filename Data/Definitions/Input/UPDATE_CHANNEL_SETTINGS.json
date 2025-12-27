@@ -4,39 +4,48 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "ForegroundColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "BackgroundColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "RedColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "BlueColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "FontSize",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "LineSpace",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "UserlistFontSize",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "UserlistBackgroundColor",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		}
 	]
 }

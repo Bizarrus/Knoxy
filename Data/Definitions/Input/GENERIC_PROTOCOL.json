@@ -1,6 +1,6 @@
 {
 	"opcode":		":",
-	"description":	"",
+	"description":	"Das \"neue\" generische Protokoll des Chatsystemes im Binär-Format (Ähnlich wie google Protobuf).",
 	"parameters":	{
 		"name": "Buffer",
 		"type": "GenericProtocol"

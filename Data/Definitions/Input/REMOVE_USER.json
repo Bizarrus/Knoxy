@@ -4,11 +4,13 @@
 	"parameters":	[
 		{
 			"name": "Nickname",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }

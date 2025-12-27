@@ -4,19 +4,23 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Nickname",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Password",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "UseSubchannels",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		}
 	]
 }

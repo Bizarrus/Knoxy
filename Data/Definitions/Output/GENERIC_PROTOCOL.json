@@ -3,6 +3,7 @@
 	"description":	"",
 	"parameters":	{
 		"name": "Buffer",
-		"type": "GenericProtocol"
+		"type": "GenericProtocol",
+		"description":	""
 	}
 }

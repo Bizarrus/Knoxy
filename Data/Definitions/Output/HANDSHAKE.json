@@ -1,62 +1,76 @@
 {
 	"opcode":		"t",
-	"description":	"",
+	"description":	"Der Handshake wird initial zum verbinden des Chatservers gesendet. Neben verschiedenen Client-Informationen werden hier auch Computer-Informationen übermittelt, die Knuddels auswertet.",
 	"parameters":	[
 		{
-			"name": "Version",
-			"type": "String"
+			"name":			"Version",
+			"type":			"String",
+			"description":	"Die Version des Clienten."
 		},
 		{
-			"name": "Location",
-			"type": "String"
+			"name": 		"Location",
+			"type": 		"String",
+			"description":	"Woher der Client stammt."
 		},
 		{
-			"name": "Category",
-			"type": "Integer"
+			"name":			"Category",
+			"type":			"Integer",
+			"description":	"Die initiale Channel-Kategorie."
 		},
 		{
-			"name": "JavaVersion",
-			"type": "String"
+			"name":			"Java Version",
+			"type":			"String",
+			"description":	"Die vom Clienten verwendete Java-Version."
 		},
 		{
-			"name": "Unused (früher PLZ)",
-			"type": "String|Integer"
+			"name":			"Unused (früher PLZ)",
+			"type":			"String|Integer",
+			"description":	"Früher wurden passende Channels anhand der PLZ gesucht. Dieser Parameter ist nun veraltet und wird nicht mehr verwendet."
 		},
 		{
-			"name": "LocalPort",
-			"type": "Integer"
+			"name":			"Local Port",
+			"type":			"Integer",
+			"description":	"Der lokale Port des Clienten."
 		},
 		{
-			"name": "JavaSoftware",
-			"type": "String"
+			"name":			"Java Software",
+			"type":			"String",
+			"description":	"Der Name der vom Clienten genutzen Java-Software."
 		},
 		{
-			"name": "KnRi-Cookie",
-			"type": "String"
+			"name":			"KnRi-Cookie",
+			"type":			"String",
+			"description":	"Unbekannter Cookie, der von Knuddels verwendet wird."
 		},
 		{
-			"name": "AllocatedMemory",
-			"type": "Integer"
+			"name":			"Allocated Memory",
+			"type":			"Integer",
+			"description":	"Der zugewiesene/genutzte Speicherplatz des Clienten."
 		},
 		{
-			"name": "JavaPublisher",
-			"type": "String"
+			"name":			"Java Publisher",
+			"type":			"String",
+			"description":	"Der Herstellername der vom Clienten genutzten Java-Software."
 		},
 		{
-			"name": "Operating System",
-			"type": "String"
+			"name":			"Operating System",
+			"type":			"String",
+			"description":	"Das verwendete Betriebssystem, von dem der Client ausgeführt wird."
 		},
 		{
-			"name": "JX/JFX Version",
-			"type": "String"
+			"name":			"JX/JFX Version",
+			"type":			"String",
+			"description":	"Die vom Clienten verwendete Java-FX bzw. JX-Browser Version."
 		},
 		{
-			"name": "PreAuth Nickname",
-			"type": "String"
+			"name":			"PreAuth Nickname",
+			"type":			"String",
+			"description":	"Vordefinierter Login-Nickname."
 		},
 		{
-			"name": "PreAuth PasswordHash",
-			"type": "String"
+			"name":			"PreAuth PasswordHash",
+			"type":			"String",
+			"description":	"Vordefiniertes Login-Password-Hash nach altem Knuddels-Hashverfahren"
 		}
 	]
 }

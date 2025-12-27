@@ -1,22 +1,26 @@
 {
 	"opcode":		"m",
-	"description":	"",
+	"description":	"Fügt in der Nickliste ein Icon hinzu.",
 	"parameters":	[
 		{
-			"name": "Channel",
-			"type": "String"
+			"name":			"Channel",
+			"type":			"String",
+			"description":	"Der Channel, in dem das Icon hinzugefügt werden soll."
 		},
 		{
-			"name": "Nickname",
-			"type": "String"
+			"name":			"Nickname",
+			"type":			"String",
+			"description":	"Der Nickname, bei dem das Icon angezeigt werden soll."
 		},
 		{
-			"name": "IconLeft",
-			"type": "String"
+			"name":			"IconLeft",
+			"type":			"String",
+			"description":	"Icon vor dem Nicknamen."
 		},
 		{
-			"name": "IconRight",
-			"type": "String"
+			"name":			"IconRight",
+			"type":			"String",
+			"description":	"Icon nach dem Nicknamen."
 		}
 	]
 }

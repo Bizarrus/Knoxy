@@ -4,19 +4,23 @@
 	"parameters":	[
 		{
 			"name": "ID",
-			"type": "new|Integer"
+			"type": "new|Integer",
+			"description":	""
 		},
 		{
 			"name": "Action",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Question",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Answers",
-			"type": "String[;]"
+			"type": "String[;]",
+			"description":	""
 		}
 	]
 }

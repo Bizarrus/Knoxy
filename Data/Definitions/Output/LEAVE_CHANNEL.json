@@ -4,7 +4,8 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }

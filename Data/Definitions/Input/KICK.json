@@ -1,14 +1,16 @@
 {
 	"opcode":		"6",
-	"description":	"",
+	"description":	"Wenn der Client vom Server gekickt wird.",
 	"parameters":	[
 		{
-			"name": "Channel",
-			"type": "String"
+			"name":			"Channel",
+			"type":			"String",
+			"description":	"Aus welchem Channel wurde der Client gekickt."
 		},
 		{
-			"name": "Reason",
-			"type": "String"
+			"name":			"Reason",
+			"type":			"String",
+			"description":	"Der Grund des kicks."
 		}
 	]
 }

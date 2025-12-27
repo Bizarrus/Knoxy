@@ -1,18 +1,21 @@
 {
 	"opcode":		"n",
-	"description":	"",
+	"description":	"Das Login-Paket, wenn der Benutzer sich einloggen möchte.",
 	"parameters":	[
 		{
-			"name": "Channel",
-			"type": "String"
+			"name":			"Channel",
+			"type":			"String",
+			"description":	"Der Channel, in den der Benutzer eingeloggt wird."
 		},
 		{
-			"name": "Nickname",
-			"type": "String"
+			"name":			"Nickname",
+			"type":			"String",
+			"description":	"Der Benutzername."
 		},
 		{
-			"name": "Password",
-			"type": "String"
+			"name":			"Password",
+			"type":			"String",
+			"description":	"Gehashtes Passwort des Benutzers. Achtung: Das Hash-Verfahren wird durch den HANSHAKE-Opcode und der dortigen Client-Version festgelegt."
 		}
 	]
 }

@@ -4,123 +4,153 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Nickname",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "ScrollSpeed",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "Width",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "Height",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "PositionX",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "PositionY",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "BackgroundImageURL",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "BackgroundImagePosition",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "Unknown",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "ForegroundColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "BackgroundColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "RedColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "BlueColor",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "FontSize",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "LineSpace",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "UserlistFontSize",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "UserlistBackgroundColor",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "ComboBox",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "ComboBox Value",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Unknown1",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "MaxMessageLength",
-			"type": "Integer"
+			"type": "Integer",
+			"description":	""
 		},
 		{
 			"name": "ButtonHelp",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "ButtonReport",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "ButtonFeedback",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "ButtonMessages",
-			"type": "Boolean:Integer"
+			"type": "Boolean:Integer",
+			"description":	""
 		},
 		{
 			"name": "Unknown2",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "TemporaryPassword",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Unknown3",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "Unknown4",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		}
 	]
 }

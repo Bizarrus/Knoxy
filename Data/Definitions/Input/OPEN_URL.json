@@ -1,14 +1,16 @@
 {
 	"opcode":		"x",
-	"description":	"",
+	"description":	"Wird vom Server gesendet, wenn der Nutzer auf einem Link klickt oder automatisch Links durch den Clienten geöffnet werden sollen.",
 	"parameters":	[
 		{
-			"name": "URL",
-			"type": "String"
+			"name":			"URL",
+			"type":			"String",
+			"description":	"Die URL, die im Browser aufgerufen werden soll."
 		},
 		{
-			"name": "Target",
-			"type": "String"
+			"name":			"Target",
+			"type":			"String",
+			"description":	"Oftmals \"_blank\", HTML-Target-Attribut."
 		}
 	]
 }

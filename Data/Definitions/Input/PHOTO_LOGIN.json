@@ -4,27 +4,33 @@
 	"parameters":	[
 		{
 			"name": "Unk",
-			"type": "Boolean"
+			"type": "Boolean",
+			"description":	""
 		},
 		{
 			"name": "URL",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Password-Key",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Password-Value",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Nickname-Key",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Nickname-Value",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }

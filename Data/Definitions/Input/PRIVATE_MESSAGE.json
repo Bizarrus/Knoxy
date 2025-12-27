@@ -4,23 +4,28 @@
 	"parameters":	[
 		{
 			"name": "Sender",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Receiver",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "ChannelTo",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Message",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "ChannelFrom",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }

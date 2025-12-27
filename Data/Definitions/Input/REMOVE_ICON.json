@@ -4,15 +4,18 @@
 	"parameters":	[
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Nickname",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Icon",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }

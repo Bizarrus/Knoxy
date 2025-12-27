@@ -4,15 +4,18 @@
 	"parameters":	[
 		{
 			"name": "Sender",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Channel",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		},
 		{
 			"name": "Message",
-			"type": "String"
+			"type": "String",
+			"description":	""
 		}
 	]
 }
