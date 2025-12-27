@@ -114,12 +114,6 @@ export default class GenericReader {
 		return this.readShort() & 0xFFFF;
 	}
 
-	readBuffer(buffer, offset = 0, length = buffer.length) {
-		for(let i = 0; i < length; i++) {
-			buffer[offset + i] = this.readByte() & 0xFF;
-		}
-	}
-
 	readUTF() {
 		const utfLength = this.readUnsignedShort();
 		const byteArray = Buffer.allocUnsafe(utfLength);
