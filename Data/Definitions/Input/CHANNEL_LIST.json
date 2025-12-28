@@ -4,8 +4,20 @@
 	"parameters":	[
 		{
 			"name": "Channels",
-			"type": "Channels[]",
-			"_comment": "/* Name, Count, Style, B, [Icon], - */"
+			"type": "ListChannel[]"
 		}
-	]
+	],
+	"subTypes": {
+		"ListChannel": {
+			"startIndex": 2,
+			"seperator": "\\0-\\0",
+			"parameters": [
+				{ "name": "Name\nCount", "type": "String\nInteger" },
+				{ "name": "FontStyle", "type": "Char (b/i/p/h)", "values": { "b": "Bold", "i": "Italic", "p": "Plain", "h": "Headline" } },
+				{ "name": "Color", "type": "String" },
+				{ "name": "Icon", "type": "String", "optional": true },
+				{ "name": "Seperator", "type": "Char" }
+			]
+		}
+	}
 }
