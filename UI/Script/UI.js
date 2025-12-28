@@ -130,7 +130,15 @@
 			}
 		} else {
 			if(data.generic) {
-				this.addEntry(entry, `<strong>${data.definition.Name}</strong>: ${data.generic.Name}`);
+				// Get the name
+				let name = 'UNKNOWN';
+				const keys = Object.keys(data.generic);
+
+				if(typeof(keys[0]) !== 'undefined') {
+					name = keys[0];
+				}
+
+				this.addEntry(entry, `<strong>${name}</strong> <i>(${data.definition.Name})</i>`);
 			} else {
 				this.addEntry(entry, `<strong>${data.definition.Name}</strong>`);
 			}
