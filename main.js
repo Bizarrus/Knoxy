@@ -90,7 +90,7 @@ class Main {
 
 		switch (action) {
 			case 'log':
-				console.log(action, value, data);
+				console.log('######', action, value, data);
 				this.LogWindow.init(this.MainWindow).then(() => {
 					this.LogWindow.send('log', data);
 				});
@@ -379,6 +379,24 @@ class Main {
 				console.log('[Proxy] Starting proxies...');
 				this.ChatProxy.start();
 				this.CardProxy.start();
+
+		let packet = "h\0James";
+		let parts = packet.split('\0');
+		let definition = Definitions.resolve('Output', parts[0], parts, packet);
+		//definition.test();
+		console.log(definition.toString());
+		console.log('-----------------------------');
+		
+		packet = "b\0Anzeigen\n1\0h\0K\0-\0Lobby\n1\n1\0p\0K\0-\0Weitere Channels\n1\0h\0K\0-\0Poker Test LOL\n1\0p\0K\0-\0Bingo Smart Free\n1\0p\0K\0-\0Bingo Solo\n1\0p\0K\0-\0FlirtDBG\n1\0p\0K\0-\0Mafia\n1\0p\0K\0-\0Psssst\n1\0p\0K\0-\0Bingo Solo Free\n1\0p\0K\0-\0Lobby\n1\0p\0K\0-\0Bingo Free\n1\0p\0K\0-\0Bingo Pro\n1\0p\0K\0-\0WordMix\n1\0p\0K\0-\0Bingo\n1\0p\0K\0-\0Bingo Pro Free\n1\0p\0K\0-\0Bingo Smart\n1\0p\0K\0-\0Poker Test\n1\0p\0K\0-";
+		parts = packet.split('\0');
+		definition = Definitions.resolve('Input', parts[0], parts, packet);
+		//definition.test();
+		console.log(JSON.stringify(definition));
+		console.log('-----------------------------');
+		console.log(definition.toString());
+
+		//process.exit(0);
+
 			}
 		}, 500);
 	}
