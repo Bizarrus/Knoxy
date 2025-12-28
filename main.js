@@ -12,6 +12,7 @@ import Definitions from './Core/Network/Protocol/Definitions.class.js';
 import Chalk from 'chalk';
 import util from 'node:util';
 import { app, ipcMain } from 'electron';
+import GenericReader from './Core/Network/Protocol/Generic/GenericReader.class.js';
 
 class Main {
 	Configuration = {
@@ -281,21 +282,9 @@ class Main {
 				//console.log('GENERIC HEX', Buffer.from(packet).toString('hex').match(/.{1,2}/g).join(' '));
 
 				if (genericChatTree !== null) {
-					generic = genericChatTree.read(packet, 2);
-
-					if (this.ChatTree.isTreeCheck(generic)) {
-						packet = this.ChatTree.modifyTreeCheck(generic);
-					}
+					generic = genericChatTree.decode(packet, 2);
 
 					this.ChatTree.handleUpdate(genericChatTree, generic);
-
-					// Verify encoding
-					const reencoded = opcode + '\0' + genericChatTree.write(generic);
-					if (reencoded !== packet) {
-					/*	console.log('ENCODING MISMATCH:', generic.getName());
-						console.log('Original :', Buffer.from(packet).toString('hex'));
-						console.log('Reencoded:', Buffer.from(reencoded).toString('hex'));*/
-					}
 				}
 			}
 		} catch (error) {

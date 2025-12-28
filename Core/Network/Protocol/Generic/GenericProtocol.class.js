@@ -1,492 +1,235 @@
 /**
- * @author  SeBiTM
+ * @author  SeBiTM, Bizarrus
  **/
+import GenericType from './GenericType.enum.js';
 import GenericReader from './GenericReader.class.js';
-import GenericWriter from './GenericWriter.class.js';
-import GenericValue from './GenericValue.class.js';
 
 export default class GenericProtocol {
-	static delimiter = ';';
-	index;
-	#tree;
-	#treeIndex;
-	#byteData;
-	nodeNames;
-	nodeValues;
-	values;
-
-	constructor(index = 0) {
-		if(!Number.isInteger(index)) {
-			throw new Error('Generic index is not an Integer');
-		}
-
-		this.index			= index;
-		this.#tree			= null;
-		this.#treeIndex		= 0;
-		this.#byteData		= null;
-		this.nodeNames		= null;
-		this.nodeIndices	= null;
-		this.nodeValues		= null;
-		this.values			= new Map();
+	constructor() {
 		this.hash			= null;
+		this.baseOffset		= 0;
+		this.nodeNames		= [];
+		this.nodeIndices	= [];
+		this.values			= new Map();
+		this.currentIndex	= 0;
 	}
 
-	static parseTree(tree = null) {
-		const base = new GenericProtocol(0);
+	static parseTree(treeStr) {
+		const protocol = new GenericProtocol();
 
-		if(tree != null) {
-			base.updateTree(tree);
+		protocol.updateTree(treeStr);
+
+		return protocol;
+	}
+
+	updateTree(treeStr) {
+		if(!treeStr) {
+			return;
 		}
 
-		return base;
-	}
+		const parts				= treeStr.split(';');
+		let partPointer = 2;
+		this.hash				= parts[0];
+		this.baseOffset			= parseInt(parts[1]) || 0;
+		this.nodeNames			= [];
+		this.nodeIndices		= [];
 
-	updateTree(tree) {
-		this.reset(tree);
-
-		this.hash	= this.next(GenericProtocol.delimiter);
-		this.index	= this.nextInt(GenericProtocol.delimiter);
-
-		for(let i = 0; i < this.index; i++) {
+		for(let i = 0; i < this.baseOffset; i++) {
 			this.nodeNames.push(null);
 			this.nodeIndices.push(null);
 		}
 
-		while(!this.isEmpty(GenericProtocol.delimiter)) {
-			this.nodeNames.push(this.next(GenericProtocol.delimiter));
+		// Find names
+		while (partPointer < parts.length && parts[partPointer] !== '') {
+			this.nodeNames.push(parts[partPointer]);
+			partPointer++;
 		}
 
-		for(let i = this.index; i < this.nodeNames.length; i++) {
-			if(this.nodeValues.has(this.nodeNames[i])) {
-				this.nodeValues.delete(this.nodeNames[i]);
+		// Find starting rules
+		while(partPointer < parts.length && (parts[partPointer] === '' || parts[partPointer] === ':')) {
+			partPointer++;
+		}
+
+		// Assign rules synchronously
+		let currentId = this.baseOffset + 1;
+
+		while(partPointer < parts.length && currentId < this.nodeNames.length) {
+			const rawRule = parts[partPointer++];
+
+			if(rawRule === ':') {
+				break;
 			}
 
-			this.nodeValues.set(this.nodeNames[i], i);
-		}
-
-		while(this.nodeIndices.length < this.nodeNames.length) {
-			const indices = [];
-
-			while(!this.isEmpty(GenericProtocol.delimiter)) {
-				indices.push(this.nextInt(GenericProtocol.delimiter));
+			if(rawRule.length > 0) {
+				this.nodeIndices[currentId] = rawRule.split(',').map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
+			} else {
+				this.nodeIndices[currentId] = [];
 			}
 
-			this.nodeIndices.push(indices);
-		}
-
-		this.next(':');
-
-		for(let i = this.index; i < this.nodeIndices.length; i++) {
-			const indices = this.nodeIndices[i];
-
-			for(const t of indices) {
-				if(t !== 0) {
-					continue;
-				}
-
-				const map = new Map();
-
-				for(let k = 0; !this.isEmpty(GenericProtocol.delimiter); k++) {
-					map.set(this.next(GenericProtocol.delimiter), k);
-				}
-
-				this.nodeValues.set(this.nodeNames[i], map);
-			}
-		}
-
-		this.reset(null);
-
-		return this;
-	}
-
-	reset(tree) {
-		this.#treeIndex = 0;
-
-		if(tree != null) {
-			this.#tree			= tree;
-			this.nodeIndices	= [];
-			this.nodeNames		= [];
-			this.nodeValues		= new Map();
-			this.values			= new Map();
+			currentId++;
 		}
 	}
 
-	next(delimiter) {
-		const nextIndex = this.#tree.indexOf(delimiter, this.#treeIndex);
-
-		if(nextIndex >= 0) {
-			const s	= this.#tree.substring(this.#treeIndex, nextIndex);
-			this.#treeIndex	= nextIndex + 1;
-			return s;
-		}
-
-		return null;
-	}
-
-	nextInt(delimiter) {
-		return parseInt(this.next(delimiter), 10);
-	}
-
-	isEmpty(delimiter) {
-		if(this.#tree.indexOf(delimiter, this.#treeIndex) === this.#treeIndex) {
-			this.#treeIndex = this.#tree.indexOf(delimiter, this.#treeIndex) + 1;
-			return true;
-		}
-
-		return false;
-	}
-
-	copyRef(ref) {
-		if(typeof(ref) === 'string') {
-			if(!this.nodeValues.has(ref)) {
-				return null;
-			}
-
-			ref = this.nodeValues.get(ref);
-		}
-
-		if(!Number.isInteger(ref)) {
-			return null;
-		}
-
-		const node	= new GenericProtocol(ref);
-		node.name					= this.nodeNames[ref];
-		node.nodeIndices			= this.nodeIndices;
-		node.nodeNames				= this.nodeNames;
-		node.nodeValues				= this.nodeValues;
+	copyRef(index) {
+		const node	= new GenericProtocol();
 		node.hash					= this.hash;
-		node.#byteData				= this.#byteData;
-
+		node.nodeNames				= this.nodeNames;
+		node.nodeIndices			= this.nodeIndices;
+		node.currentIndex			= index;
+		node.values					= new Map();
 		return node;
 	}
 
 	add(key, value) {
-		if(this.values.has(key)) {
-			this.values.delete(key);
+		this.values.set(key, value);
+	}
+
+	decode(string, position = 0) {
+		const reader = new GenericReader(string, position);
+		return this.read(reader);
+	}
+
+	read(reader) {
+		const rootIndex		= reader.readShort();
+		this.currentIndex	= rootIndex;
+		const result	= this.executeRead(reader, rootIndex);
+		this.values			= new Map();
+		const name			= this.nodeNames[rootIndex] || `ID_${rootIndex}`;
+
+		if(result instanceof Map) {
+			this.values = result;
+		} else {
+			this.values.set(name, result);
 		}
 
-		this.values.set(key, value);
 		return this;
 	}
 
-	get(key) {
-		if(!this.values.has(key)) {
-			return null;
+	executeRead(reader, ind, node = null) {
+		if(node === null) {
+			node = this.copyRef(ind);
 		}
 
-		return this.values.get(key);
-	}
+		const indices = this.nodeIndices[ind];
 
-	containsKey(key) {
-		return this.values.has(key);
-	}
+		if(!indices || indices.length === 0) {
+			return node;
+		}
 
-	getValues() {
-		return this.#getValues(this);
-	}
+		for(let i = 0; i < indices.length; i++) {
+			let lnInd = indices[i];
+			let nName = this.nodeNames[lnInd];
 
-	#getValues(value) {
-		if(value instanceof GenericProtocol) {
-			const out = {};
+			switch(lnInd) {
+				case GenericType.BYTE:
+				case GenericType.ENUM:
+					return reader.readByte();
+				case GenericType.BOOLEAN:
+					return reader.readBoolean();
+				case GenericType.SHORT:
+					return reader.readShort();
+				case GenericType.INTEGER:
+					return reader.readInt();
+				case GenericType.LONG:
+					return reader.readLong();
+				case GenericType.FLOAT:
+					return reader.readFloat();
+				case GenericType.DOUBLE:
+					return reader.readDouble();
+				case GenericType.CHAR:
+					return reader.readChar();
+				case GenericType.UTF:
+					return reader.readUTF().replace('\u20AD', 'K');
+				/*
+				case GenericType.BINARY:
+					// Binary Data
+				break;
+				*/
+				case GenericType.ARRAY:
+					i++;
+					const listInd		= indices[i];
+					const arrList	= [];
 
-			for(const [ k, v ] of value.values) {
-				out[k] = this.#getValues(v);
+					node.add(this.nodeNames[listInd], arrList);
+
+					while(reader.position < reader.length && reader.readByte() === 11) {
+						arrList.push(this.executeRead(reader, listInd, null));
+					}
+
+					i++; // Skip 12 (GenericType.ARRAY_END)
+				break;
+				/*
+				case GenericType.ARRAY_END: (12)
+					// Array End
+				break;
+				*/
+				case GenericType.STRING:
+					const str = this.readChars(reader);
+
+					if(indices.length === 1) {
+						return str;
+					}
+
+					node.add(this.nodeNames[ind] || 'value', str);
+				break;
+				default:
+					if(nName) {
+						node.add(nName, this.executeRead(reader, lnInd, null));
+					}
+				break;
 			}
-
-			return out;
 		}
 
-		if(value instanceof GenericValue) {
-			return value.toJSON();
-		}
-
-		if(Array.isArray(value)) {
-			return value.map(v => this.#getValues(v));
-		}
-
-		return value;
+		return node;
 	}
 
-	getSize() {
-		return this.values.size;
-	}
-
-	getName() {
-		return this.name;
-	}
-
-	getValue(nodeName, key) {
-		if(!this.nodeValues.has(nodeName)) {
-			return -1;
-		}
-
-		const dic = this.nodeValues.get(nodeName);
-
-		if(!(dic instanceof Map)) {
-			return -1;
-		}
-
-		if(!dic.has(key)) {
-			return -1;
-		}
-
-		return dic.get(key);
-	}
-
-	static encodeString(value) {
-		if(value == null) {
-			return '\u0000';
-		}
-
-		if(value.startsWith('\u0000')) {
-			return '\u0000' + value;
-		}
-
-		return value;
-	}
-
-	static decodeString(value) {
-		if(value === null || value.length === 0 || value.charAt(0) !== '\u0000') {
-			return value;
-		}
-
-		if(value.length === 1) {
-			return null;
-		}
-
-		return value.substring(1);
-	}
-
-	static readChars(reader) {
-		let length = reader.readUnsignedByte();
+	readChars(reader) {
+		let length = reader.readByte() & 0xFF;
 
 		if(length === 255) {
 			return null;
 		}
 
 		if(length >= 128) {
-			length = ((length & 0x7f) << 16) | (reader.readUnsignedByte() << 8) | reader.readUnsignedByte();
+			length = ((length - 128) << 16) | (reader.readByte() << 8) | reader.readByte();
 		}
 
-		let out = '';
+		let str = [];
 
 		for(let i = 0; i < length; i++) {
-			out += reader.readChar();
+			str[i] = String.fromCharCode(reader.readShort());
 		}
 
-		return out;
+		return str.join('');
 	}
 
-	static writeChars(writer, value) {
-		if(value == null) {
-			writer.writeByte(255);
-			return;
-		}
-
-		const length = value.length;
-
-		if(length < 128) {
-			writer.writeByte(length);
-		} else {
-			if(length >= 8388608) {
-				throw new Error('String too long ' + length);
-			}
-
-			writer.writeByte((length >>> 16) | 0x80);
-			writer.writeByte((length >>> 8) & 0xFF);
-			writer.writeByte(length & 0xFF);
-		}
-
-		if(length > 0) {
-			writer.writeChars(value);
-		}
+	getName() {
+		return this.nodeNames[this.currentIndex] || `ID_${this.currentIndex}`;
 	}
 
-	read(data, offset = 0) {
-		return this.readReader(new GenericReader(data, offset));
-	}
-
-	readReader(reader) {
-		const index					= reader.readShort();
-		const node	= this.copyRef(index);
-
-		if(this.readInternal(reader, index, node) !== node) {
-			throw new Error('Tokens mapped directly to a primitive value can not be encoded');
-		}
-
-		return node;
-	}
-
-	readInternal(reader, index, node) {
-		if(node == null) {
-			node = this.copyRef(index);
-		}
-
-		const indices = node.nodeIndices[index];
-
-		if(!indices) {
-			throw new Error(`No nodeIndices for index=${index} name=${node.nodeNames?.[index]}`);
-		}
-
-		for(let i = 0; i < indices.length; i++) {
-			let ind = indices[i];
-
-			switch(ind) {
-				case 0:
-					return new GenericValue('Byte', reader.readByte());
-				case 1:
-					return new GenericValue('Boolean', reader.readBoolean());
-				case 2:
-					return new GenericValue('Enum', reader.readByte());
-				case 3:
-					return new GenericValue('Short', reader.readShort());
-				case 4:
-					return new GenericValue('Integer', reader.readInt());
-				case 5:
-					return new GenericValue('Long', reader.readLong());
-				case 6:
-					return new GenericValue('Float', reader.readFloat());
-				case 7:
-					return new GenericValue('Double', reader.readDouble());
-				case 8:
-					return new GenericValue('Char', reader.readChar());
-				case 9:
-					return new GenericValue('UTF-String', GenericProtocol.decodeString(reader.readUTF()));
-				case 10:
-					throw new Error('Not implemented yet: BinaryType');
-				case 11: {
-					i++;
-					ind 				= indices[i];
-					const list	= [];
-
-					node.add(this.nodeNames[ind], new GenericValue('List', list));
-
-					while(reader.readByte() === 11) {
-						list.push(this.readInternal(reader, ind, null));
-					}
-
-					i++;
-					break;
-				}
-				case 12:
-					/* Do Nothing */
-				break;
-				case 13:
-					return new GenericValue('String', GenericProtocol.readChars(reader));
-				default:
-					node.add(this.nodeNames[ind], this.readInternal(reader, ind, null));
-				break;
-			}
-		}
-
-		return node;
-	}
-
-	write(genericProtocol, asString = true) {
-		const writer = new GenericWriter(asString);
-
-		this.writeWriter(genericProtocol, genericProtocol.index, writer);
-
-		return asString ? writer.toString() : writer.toBuffer();
-	}
-
-	writeWriter(genericProtocol, index, writer) {
-		if(this.#byteData) {
-			writer.writeBytes(this.#byteData);
-		}
-
-		writer.writeShort(index);
-
-		this.writeInternal(genericProtocol, index, writer);
-	}
-
-	writeInternal(object, index, writer) {
-		object			= ((object instanceof GenericValue) ? object.value : object);
-		const indices	= this.nodeIndices[index];
-
-		for(let i = 0; i < indices.length; i++) {
-			let t = indices[i];
-
-			switch(t) {
-				case 0:
-					writer.writeByte(object == null ? 0 : object);
-				break;
-				case 1:
-					writer.writeBoolean(object != null && object === true);
-				break;
-				case 2:
-					writer.writeByte(object == null ? 0 : object);
-				break;
-				case 3:
-					writer.writeShort(object == null ? 0 : object);
-				break;
-				case 4:
-					writer.writeInt(object == null ? 0 : object);
-				break;
-				case 5:
-					writer.writeLong(object == null ? 0n : BigInt(object));
-				break;
-				case 6:
-					writer.writeFloat(object == null ? 0 : object);
-				break;
-				case 7:
-					writer.writeDouble(object == null ? 0 : object);
-				break;
-				case 8:
-					writer.writeChar(object == null ? 0 : object);
-				break;
-				case 9:
-					writer.writeUTF(GenericProtocol.encodeString(object));
-				break;
-				case 10:
-					throw new Error('Not implemented yet: BinaryType');
-				case 11: {
-					i++;
-					const sub		= indices[i];
-					let list	= null;
-
-					if(object != null) {
-						const name	= this.nodeNames[sub];
-						list		= object.get(name);
-					}
-
-					if(!list) {
-						writer.writeByte(12);
-						i++;
-						break;
-					}
-
-					list = ((list instanceof GenericValue) ? list.value : list);
-
-					for(const obj of list) {
-						writer.writeByte(11);
-						this.writeInternal(obj, sub, writer);
-					}
-
-					writer.writeByte(12);
-					i++;
-					break;
-				}
-				case 12:
-					/* Do Nothing */
-				break;
-				case 13:
-					GenericProtocol.writeChars(writer, object);
-				break;
-				default: {
-					const name			= this.nodeNames[t];
-					const next = (object ? object.get(name) : null);
-					this.writeInternal(next, t, writer);
-					break;
-				}
-			}
-		}
+	get(key) {
+		return this.values.get(key);
 	}
 
 	toJSON() {
-		return {
-			Name:	this.getName(),
-			Values:	this.getValues()
+		const convert = (val) => {
+			if(val instanceof Map) {
+				const obj = {};
+
+				for(let [k, v] of val) {
+					obj[k] = convert(v);
+				}
+
+				return obj;
+			}
+
+			if(Array.isArray(val)) {
+				return val.map(convert);
+			}
+
+			return val;
 		};
+
+		return convert(this.values);
 	}
 }

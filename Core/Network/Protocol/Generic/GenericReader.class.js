@@ -1,6 +1,8 @@
 /**
- * @author  SeBiTM
+ * @author  SeBiTM, Bizarrus
  **/
+import GenericType from './GenericType.enum.js';
+
 export default class GenericReader {
 	constructor(data, position = 0) {
 		if(typeof(data) === 'string') {
@@ -30,11 +32,9 @@ export default class GenericReader {
 
 	readByte() {
 		if(this.byteData === null) {
-			const c = this.stringData.charCodeAt(this.position++);
-
-			return (c << 24) >> 24;
+			return this.stringData.charCodeAt(this.position++) & 0xFF;
 		} else {
-			return (this.byteData[this.position++] << 24) >> 24;
+			return this.byteData[this.position++] & 0xFF;
 		}
 	}
 
@@ -74,7 +74,7 @@ export default class GenericReader {
 	}
 
 	readFloat() {
-		const v		= this.readInt();
+		const v						= this.readInt();
 		const buf	= Buffer.allocUnsafe(4);
 
 		buf.writeInt32BE(v, 0);
@@ -115,8 +115,8 @@ export default class GenericReader {
 	}
 
 	readUTF() {
-		const utfLength = this.readUnsignedShort();
-		const byteArray = Buffer.allocUnsafe(utfLength);
+		const utfLength 					= this.readUnsignedShort();
+		const byteArray	= Buffer.allocUnsafe(utfLength);
 
 		this.readBuffer(byteArray, 0, utfLength);
 
@@ -141,19 +141,19 @@ export default class GenericReader {
 			const c = byteArray[count] & 0xFF;
 
 			switch(c >> 4) {
-				case 0:
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-				case 5:
-				case 6:
-				case 7: {
+				case GenericType.BYTE:
+				case GenericType.BOOLEAN:
+				case GenericType.ENUM:
+				case GenericType.SHORT:
+				case GenericType.INTEGER:
+				case GenericType.LONG:
+				case GenericType.FLOAT:
+				case GenericType.DOUBLE: {
 					count++;
 					charArray[chararrCount++] = String.fromCharCode(c);
 					break;
 				}
-				case 12:
+				case 12: // GenericType.ARRAY_END
 				case 13: {
 					count += 2;
 
